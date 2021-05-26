@@ -89,7 +89,7 @@ def parse_file(filename):
         #     children.append(traverse(node.context_expr))
         #     if node.optional_vars:
         #         children.append(traverse(node.optional_vars))
-            children.append(traverse_list(node.body, 'body'))
+            # children.append(traverse_list(node.body, 'body'))
         elif isinstance(node, ast.Try):
             children.append(traverse_list(node.body, 'body'))
             children.append(traverse_list(node.handlers, 'handlers'))
