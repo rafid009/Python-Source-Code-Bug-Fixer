@@ -5,11 +5,12 @@ import pandas as pd
 import numpy as np
 import ast #import parse
 import json
-import ast2json
+#import ast2json
 
-directory_name = {'eval': '../SE/eval/', 'train': '../SE/train/'}
-output_folder = {'eval': '../SE/eval-asts/', 'train': '../SE/train-asts/'}
-csv_name = {'eval': '../SE/eval', 'train': '../SE/train'}
+
+directory_name = {'eval': '../CS531/Final_Project/preprocessing/SE/SE/eval/', 'train': '../CS531/Final_Project/preprocessing/SE/SE//train/'}
+output_folder = {'eval': '../CS531/Final_Project/preprocessing/SE/SE//eval-asts/', 'train': '../CS531/Final_Project/preprocessing/SE/SE//train-asts/'}
+csv_name = {'eval': '../CS531/Final_Project/preprocessing/SE/SE/eval', 'train': '../CS531/Final_Project/preprocessing/SE/SE/train'}
 
 
 def read_file_to_string(filename):
