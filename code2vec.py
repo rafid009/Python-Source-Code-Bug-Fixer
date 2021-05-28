@@ -2,7 +2,7 @@ from gensim import models
 import os
 import json
 
-ast_folders = ['../SE/train-asts/', '../SE/eval-asts/', '../py150/']
+ast_folders = ['../data/train-asts/', '../data/eval-asts/', '../../py150/']
 
 corpus = []
 def to_string_list(code_list):

@@ -5,11 +5,10 @@ import pandas as pd
 import numpy as np
 import ast #import parse
 import json
-import ast2json
 
-directory_name = {'eval': '../SE/eval/', 'train': '../SE/train/'}
-output_folder = {'eval': '../SE/eval-asts/', 'train': '../SE/train-asts/'}
-csv_name = {'eval': '../SE/eval', 'train': '../SE/train'}
+directory_name = {'eval': '../data/eval/', 'train': '../data/train/'}
+output_folder = {'eval': '../data/eval-asts/', 'train': '../data/train-asts/'}
+csv_name = {'eval': '../data/eval', 'train': '../data/train'}
 
 
 def read_file_to_string(filename):
@@ -85,11 +84,14 @@ def parse_file(filename):
             children.append(traverse_list(node.body, 'body'))
             if node.orelse:
                 children.append(traverse_list(node.orelse, 'orelse'))
+<<<<<<< Updated upstream
         # elif isinstance(node, ast.With):
         #     children.append(traverse(node.context_expr))
         #     if node.optional_vars:
         #         children.append(traverse(node.optional_vars))
             # children.append(traverse_list(node.body, 'body'))
+=======
+>>>>>>> Stashed changes
         elif isinstance(node, ast.Try):
             children.append(traverse_list(node.body, 'body'))
             children.append(traverse_list(node.handlers, 'handlers'))
