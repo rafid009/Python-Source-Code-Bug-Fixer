@@ -1,0 +1,35 @@
+import numpy as np 
+
+def function(x):
+
+	f8 = 4
+	q1 = 0
+	paths = []
+	try:
+		if f8 < 3:
+			f8 = x/f8
+			q1 = q1-5
+			paths.append(1)
+		else:
+			q1 = q1/5
+			f8 = 0+8
+			paths.append(2)
+		if q1 > 8:
+			f8 = 8-f8
+			paths.append(3)
+		else:
+			q1 = q1/2
+			x = x*8
+			paths.append(4)
+		paths.append(5)
+		assert x >= 0
+		x = x**0.5
+		return x, None
+	except AssertionError:
+		return None, paths
+	except ZeroDivisionError:
+		return None, 'div0'
+
+if __name__ == "__main__":
+	x = int(input("Enter an integer"))
+	print(function(x))

@@ -1,0 +1,36 @@
+import numpy as np 
+
+def function(x):
+
+	r1 = 7
+	s2 = x
+	paths = []
+	try:
+		if x <= 2:
+			s2 = 4-s2
+			x = x*s2
+			paths.append(1)
+		else:
+			s2 = 2/s2
+			s2 = 3/x
+			paths.append(2)
+		if s2 >= 3:
+			r1 = r1+9
+			r1 = 6-3
+			x = 8/x
+			paths.append(3)
+		else:
+			r1 = r1/s2
+			paths.append(4)
+		paths.append(5)
+		assert x >= 0
+		r1 = x**0.5
+		return r1, None
+	except AssertionError:
+		return None, paths
+	except ZeroDivisionError:
+		return None, 'div0'
+
+if __name__ == "__main__":
+	x = int(input("Enter an integer"))
+	print(function(x))

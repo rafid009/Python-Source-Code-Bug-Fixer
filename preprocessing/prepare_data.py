@@ -6,10 +6,10 @@ import numpy as np
 import ast #import parse
 import json
 
-directory_name = {'eval': '../data/eval/', 'train': '../data/train/'}
-output_folder = {'eval': '../data/eval-asts/', 'train': '../data/train-asts/'}
-processed_path_slices = '../processed/'
-csv_name = {'eval': '../data/eval', 'train': '../data/train'}
+directory_name = {'eval': './data/eval/', 'train': './data/train/'}
+output_folder = {'eval': './data/eval-asts/', 'train': './data/train-asts/'}
+processed_path_slices = './processed/'
+csv_name = {'eval': './data/eval', 'train': './data/train'}
 
 
 def read_file_to_string(filename):

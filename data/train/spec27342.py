@@ -1,0 +1,38 @@
+import numpy as np 
+
+def function(x):
+
+	v8 = 3
+	l4 = 6
+	paths = []
+	try:
+		if l4 > 4:
+			l4 = 2-l4
+			v8 = 0-v8
+			l4 = 0-l4
+			paths.append(1)
+		else:
+			l4 = l4+6
+			v8 = 4-v8
+			l4 = l4-v8
+			paths.append(2)
+		if v8 >= 7:
+			x = 8*x
+			x = x*6
+			paths.append(3)
+		else:
+			v8 = 5/v8
+			l4 = 5+x
+			paths.append(4)
+		paths.append(5)
+		assert l4 >= 0
+		x = l4**0.5
+		return x, None
+	except AssertionError:
+		return None, paths
+	except ZeroDivisionError:
+		return None, 'div0'
+
+if __name__ == "__main__":
+	x = int(input("Enter an integer"))
+	print(function(x))

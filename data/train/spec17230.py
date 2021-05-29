@@ -1,0 +1,33 @@
+import numpy as np 
+
+def function(x):
+
+	q2 = 6
+	m9 = 4
+	paths = []
+	try:
+		if m9 >= 2:
+			m9 = 8-m9
+			paths.append(1)
+		else:
+			x = 4*4
+			paths.append(2)
+		if m9 < 8:
+			q2 = q2+5
+			paths.append(3)
+		else:
+			x = 9+x
+			q2 = q2-0
+			paths.append(4)
+		paths.append(5)
+		assert x >= 0
+		x = x**0.5
+		return x, None
+	except AssertionError:
+		return None, paths
+	except ZeroDivisionError:
+		return None, 'div0'
+
+if __name__ == "__main__":
+	x = int(input("Enter an integer"))
+	print(function(x))

@@ -1,0 +1,35 @@
+import numpy as np 
+
+def function(x):
+
+	m1 = 4
+	z3 = x
+	paths = []
+	try:
+		if z3 > 8:
+			z3 = z3-z3
+			paths.append(1)
+		else:
+			m1 = 6/m1
+			paths.append(2)
+		if z3 > 8:
+			m1 = x*z3
+			z3 = 1+z3
+			paths.append(3)
+		else:
+			x = 4*9
+			m1 = z3+m1
+			z3 = z3/4
+			paths.append(4)
+		paths.append(5)
+		assert z3 >= 0
+		x = z3**0.5
+		return x, None
+	except AssertionError:
+		return None, paths
+	except ZeroDivisionError:
+		return None, 'div0'
+
+if __name__ == "__main__":
+	x = int(input("Enter an integer"))
+	print(function(x))

@@ -1,0 +1,40 @@
+import numpy as np 
+
+def function(x):
+
+	t4 = x
+	p1 = x
+	x = x
+	paths = []
+	try:
+		if p1 < 9:
+			x = x+8
+			x = 8-2
+			p1 = p1*4
+			paths.append(1)
+		else:
+			x = 4*x
+			t4 = 8+t4
+			t4 = t4/4
+			paths.append(2)
+		if p1 < 2:
+			t4 = 4-7
+			p1 = 8*p1
+			paths.append(3)
+		else:
+			p1 = 6-p1
+			t4 = 5*t4
+			p1 = 4/p1
+			paths.append(4)
+		paths.append(5)
+		assert t4 >= 0
+		t4 = t4**0.5
+		return t4, None
+	except AssertionError:
+		return None, paths
+	except ZeroDivisionError:
+		return None, 'div0'
+
+if __name__ == "__main__":
+	x = int(input("Enter an integer"))
+	print(function(x))

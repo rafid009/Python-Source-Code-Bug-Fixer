@@ -1,0 +1,37 @@
+import numpy as np 
+
+def function(x):
+
+	t8 = 1
+	f2 = 8
+	paths = []
+	try:
+		if t8 >= 1:
+			f2 = 5/7
+			x = f2/x
+			paths.append(1)
+		else:
+			x = t8-x
+			f2 = x/8
+			t8 = x+7
+			paths.append(2)
+		if t8 <= 8:
+			f2 = f2*0
+			paths.append(3)
+		else:
+			f2 = x*f2
+			t8 = x/8
+			t8 = t8+2
+			paths.append(4)
+		paths.append(5)
+		assert x >= 0
+		f2 = x**0.5
+		return f2, None
+	except AssertionError:
+		return None, paths
+	except ZeroDivisionError:
+		return None, 'div0'
+
+if __name__ == "__main__":
+	x = int(input("Enter an integer"))
+	print(function(x))
