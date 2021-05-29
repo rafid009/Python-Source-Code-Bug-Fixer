@@ -1,0 +1,57 @@
+{
+    "continue_training":true,
+    "print_tokens": false,
+    "random_agent": true,
+
+    "train_ast_path": "../data/train-asts",
+    "train_ast_states": "../processed/train-processed.json",
+    "eval_ast_path": "../data/eval-asts",
+
+    "save_path_AWS":"/home/ubuntu/storage/ARP1",
+    "load_path_AWS": "/home/ubuntu/storage/ARP1/Model 0",
+    "record_every": 10,
+    "loops":1,
+    "epochs":2,
+    "EVAL_GAMES":1,
+    "episodes": 2,
+    "final_eval":1,
+    "unroll_steps": 4,
+    "start_reward_train": 0,
+    "pool_workers": 80,
+    "spectral_weight_decay": 1E-4,
+    "infinity":10E4,
+
+    "vars":12,
+    "conditions":5,
+    "operations":19,
+    "op_embedding_dim1":6,
+    "filters": 64,
+    "con_embedding_dim": 64,
+    "final_embedding": 128,
+    "k": 200,
+    "device": "/CPU:0",
+
+    "hidden_value": 540,
+    "hidden_policy": 540,
+    "hidden_reward": 40,
+    "pb_c_base": 19652,
+    "pb_c_init": 1.15,
+    "pb_c_init_eval": 1.0,
+        "max_value":1,
+    "discount":0.99,
+        "alpha":0.25,
+    "eval_alpha": 0.25,
+    "simulations":17,
+    "batch_size":32,
+    "td_steps":11,
+    "lr":0.0001,
+    "max_J": 49,
+
+
+    "max_moves":10,
+    "REWARDS":{
+        "win":1.0,
+        "loss":0.0,
+        "tie": 0.0
+    }
+}
