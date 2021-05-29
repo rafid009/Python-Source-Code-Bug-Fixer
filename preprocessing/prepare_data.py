@@ -8,6 +8,7 @@ import json
 
 directory_name = {'eval': '../data/eval/', 'train': '../data/train/'}
 output_folder = {'eval': '../data/eval-asts/', 'train': '../data/train-asts/'}
+processed_path_slices = '../processed/'
 csv_name = {'eval': '../data/eval', 'train': '../data/train'}
 
 
@@ -17,6 +18,81 @@ def read_file_to_string(filename):
     f.close()
     return s
 
+def process_paths(dataset_folder, dataset_str):
+
+    '''
+    dataset_str : ['train', 'eval'], 
+                    used for accessing ASTs and saving paths
+    '''
+    print(dataset_folder)
+    # Read contents of ASTs directory
+    filenames = os.listdir(dataset_folder) 
+    
+    # Filter out non JSON files
+    filenames = [filename for filename in filenames if filename.endswith('.json')]
+    # Sort list of filenames
+    filenames.sort()
+
+    # Create dictionary for storing processed data
+    processed = {}
+
+    # path names
+    path_names = {
+        '0':[0],
+        '0-1' :[0,1],
+        '0-2' :[0,2],
+        '0-1-3' :[0,1,3],
+        '0-1-4' : [0,1,4],
+        '0-2-3' :[0,2,3],
+        '0-2-4' : [0,2,4],
+        '0-1-3-5' :[0,1,3,5],
+        '0-1-4-5' : [0,1,4,5],
+        '0-2-3-5' :[0,2,3,5],
+        '0-2-4-5' : [0,2,4,5],     
+    }
+
+    for filename in filenames:
+        print(filename)
+        # Read contents of AST file and parse nested JSON AST file
+        json_li = json.loads(open(dataset_folder+filename).read())
+        
+        # Extract JSON objects representing conditional statements 
+        #   i.e. where obj['type'] is either 'If' or 'orelse'
+        conditionals = [(idx, obj) for idx, obj in enumerate(json_li) if (obj['type']=='If' or obj['type']=='orelse')]
+        # bodies = [(idx, obj) for idx, obj in enumerate(json_li) if obj['type']=='body']
+
+        leaves = []
+        for idx in range(len(json_li)):
+            if (json_li[idx]['type']=='NameLoad' 
+                and json_li[idx]['value']=='paths' 
+                and json_li[idx+1]['type']=='attr' 
+                and json_li[idx+1]['value']=='append'):
+                
+                leaves.append((idx+2, json_li[idx+2]))
+        
+        nodes = []
+ 
+        nodes.append(list(range(conditionals[0][0]))) # 0 -before 1st if statement, header code, root node
+        nodes.append(list(range(conditionals[0][0],conditionals[1][0]))) # 1- first if
+        nodes.append(list(range(conditionals[1][0],conditionals[2][0]))) # 2- first else
+        nodes.append(list(range(conditionals[2][0],conditionals[3][0]))) # 3- second if
+        nodes.append(list(range(conditionals[3][0],conditionals[4][0]))) # 4- second else
+        nodes.append(list(range(conditionals[4][0],len(json_li)))) # 5-last stray if and footer code
+
+        processed[filename] = {}
+        processed[filename]['file'] = dataset_folder+filename
+        processed[filename]['paths'] = {}
+
+        for k in path_names:
+            processed[filename]['paths'][k] = []
+            for i in path_names[k]:
+                processed[filename]['paths'][k] += nodes[i]
+    if not os.path.isdir(processed_path_slices):
+        os.makedirs(processed_path_slices)
+
+    with open(processed_path_slices+dataset_str+'-processed.json', 'w') as fp:
+        json.dump(processed, fp)
+        
 def parse_file(filename):
     global c, d
     tree = ast.parse(read_file_to_string(filename), filename)
@@ -84,22 +160,11 @@ def parse_file(filename):
             children.append(traverse_list(node.body, 'body'))
             if node.orelse:
                 children.append(traverse_list(node.orelse, 'orelse'))
-<<<<<<< Updated upstream
-        # elif isinstance(node, ast.With):
-        #     children.append(traverse(node.context_expr))
-        #     if node.optional_vars:
-        #         children.append(traverse(node.optional_vars))
-            # children.append(traverse_list(node.body, 'body'))
-=======
->>>>>>> Stashed changes
         elif isinstance(node, ast.Try):
             children.append(traverse_list(node.body, 'body'))
             children.append(traverse_list(node.handlers, 'handlers'))
             if node.orelse:
                 children.append(traverse_list(node.orelse, 'orelse'))
-        # elif isinstance(node, ast.ExceptHandler):
-        #     children.append(traverse_list(node.body, 'body'))
-        #     children.append(traverse_list(node., 'finalbody'))
         elif isinstance(node, ast.arguments):
             children.append(traverse_list(node.args, 'args'))
             children.append(traverse_list(node.defaults, 'defaults'))
@@ -177,6 +242,7 @@ for key in directory_name:
         data['ast'].append(table[file_key]['ast'])
 
     pd.DataFrame(data).to_csv(csv_name[key] + '.csv', index=False)
+    process_paths(output_folder[key], key)
 
 
 

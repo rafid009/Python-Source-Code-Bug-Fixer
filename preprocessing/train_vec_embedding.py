@@ -32,5 +32,7 @@ code2vec = models.FastText(corpus, vector_size=128, window=5, min_count=5, worke
 code2vec.save('code2vec.model')
 
 # code2vec = models.FastText.load('code2vec.model')
-# print(code2vec.wv.most_similar('elif', topn=10))
+# print("loaded")
+# print(code2vec.wv.most_similar('{"type":"NameStore","value":"x"}', topn=10))
+# print(type(code2vec.wv['{"type":"NameStore","value":"x"}']))
 # data_to_json('../py150/python100k_train.json')
