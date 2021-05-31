@@ -25,6 +25,8 @@
     
     "conditions": 5,
     "filters": 64,
+    "input_fixed_rep_height": 64,
+    "input_fixed_rep_width": 64,
     "con_embedding_dim": 64,
     "final_embedding": 128,
     "k": 200,

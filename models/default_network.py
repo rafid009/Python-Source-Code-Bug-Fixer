@@ -9,22 +9,26 @@ import json
 import pickle
 
 # from networks.spectral import eigen, laplacean
-# from gym_tic.envs.specimen_parsers.Configure import configuration as con
+from configs.Configure import configuration as con
 # from gym_tic.envs.specimen_parsers.Configure import shapes as S
 
 from numpy.random import seed
 
 seed(1)
 
-def weight_init(fanin, type='he'):
-    """He Xavier variance calculation for initialization
-    Inputs:
-        fanin - (int) The number of input inputs to a given layer.
-    Returns: An integer corresponding to the needed variance to initialize the trainable variable."""
-    if type=='he':
-        return np.sqrt(2 / fanin)
-    if type=='selu':
-        return np.sqrt(1 / fanin)
+def conv3x3(in_channels, out_channels, stride=1, padding=1):
+    return torch.nn.Conv2d(
+        in_channels, out_channels, kernel_size=3, stride=stride, padding=padding, bias=False
+    )
+
+def adaptiveAvgPool(shape):
+    return torch.nn.AdaptiveAvgPool2d(shape)
+
+def adaptiveMaxPool(shape):
+    return torch.nn.AdaptiveMaxPool2d(shape)
+
+def relu(x):
+    return torch.nn.functional.relu(x)
 
 class DefaultNetwork(BaseNetwork):
 
@@ -34,63 +38,86 @@ class DefaultNetwork(BaseNetwork):
                  state_size: int = 0,
                  load_path: str = None):
 
-        regularizer = regularizers.l2(weight_decay)
+        # regularizer = regularizers.l2(weight_decay)
         if con['continue_training']:
             load_path = con['load_path']
-
+        
+        self.policy_network = None
+        self.value_network = None
+        self.reward_network = None 
+        self.representation_network = None
+        self.meta_data = None
         if load_path:
-            policy_network, value_network, reward_network, pre_con_network, meta_data = self.load_networks(load_path)
-            self.action_size = meta_data['action_size']
+            self.policy_network, self.value_network, self.reward_network, self.representation_network, self.meta_data = self.load_networks(load_path)
+            self.action_size = self.meta_data['action_size']
         else:
             self.action_size = action_size
-            shapes = S
 
-            value_network = Sequential([Dense(con['hidden_value'], activation='selu', kernel_regularizer=regularizer,
-                                              kernel_initializer='lecun_normal', bias_initializer="lecun_normal",
-                                              input_dim=shapes['output_size']),
-                                        Dense(3, kernel_regularizer=regularizer, input_dim=con['hidden_value'])])
+            self.representation_network = RepresentationNetwork()
+            
+            input_features = 512 * 16 * 16
+            
+            self.value_network = torch.nn.Sequential(
+                torch.nn.Linear(input_features, con['hidden_value']),
+                torch.nn.SELU(),
+                torch.nn.Linear(con['hidden_value'], 3)
+            )
+            
+            self.reward_network = torch.nn.Sequential(
+                torch.nn.Linear(input_features, con['hidden_reward']),
+                torch.nn.SELU(),
+                torch.nn.Linear(con['hidden_reward'], 1)
+            )
+            
+            self.reward_network = torch.nn.Sequential(
+                torch.nn.Linear(input_features, con['hidden_policy']),
+                torch.nn.SELU(),
+                torch.nn.Linear(con['hidden_policy'], action_size)
+            )
+            
+            # value_network = torch.nn.Sequential([Dense(con['hidden_value'], activation='selu', kernel_regularizer=regularizer,
+            #                                   kernel_initializer='lecun_normal', bias_initializer="lecun_normal",
+            #                                   input_dim=shapes['output_size']),
+            #                             Dense(3, kernel_regularizer=regularizer, input_dim=con['hidden_value'])])
 
-            reward_network = Sequential([Dense(con['hidden_reward'], activation='selu', kernel_regularizer=regularizer,
-                                              kernel_initializer='lecun_normal', bias_initializer="lecun_normal",
-                                               input_dim=(shapes['x_out_shape'])),
-                                        Dense(1, kernel_regularizer=regularizer, input_dim=con['hidden_reward'],
-                                              activation=None)])
+            # reward_network = Sequential([Dense(con['hidden_reward'], activation='selu', kernel_regularizer=regularizer,
+            #                                   kernel_initializer='lecun_normal', bias_initializer="lecun_normal",
+            #                                    input_dim=(shapes['x_out_shape'])),
+            #                             Dense(1, kernel_regularizer=regularizer, input_dim=con['hidden_reward'],
+            #                                   activation=None)])
 
-            policy_network = Sequential([Dense(con['hidden_policy'], activation='selu', kernel_regularizer=regularizer,
-                                               kernel_initializer='lecun_normal', bias_initializer="lecun_normal",
-                                               input_dim=shapes['output_size']),
-                                         Dense(action_size, kernel_regularizer=regularizer,
-                                               input_dim=con['hidden_policy'])])
+            # policy_network = Sequential([Dense(con['hidden_policy'], activation='selu', kernel_regularizer=regularizer,
+            #                                    kernel_initializer='lecun_normal', bias_initializer="lecun_normal",
+            #                                    input_dim=shapes['output_size']),
+            #                              Dense(action_size, kernel_regularizer=regularizer,
+            #                                    input_dim=con['hidden_policy'])])
 
-            pre_con_network = PreConvolve(file_path=load_path, load_from_path=False, shapes=shapes)
 
-        super().__init__(value_network, reward_network, policy_network, pre_con_network, load_path=load_path)
+        super().__init__(self.value_network, self.reward_network, self.policy_network, self.representation_network, load_path=load_path)
 
-    def load_networks(self, file_path='test'):
-        policy_network = tf.keras.models.load_model(os.path.join(file_path, 'policy_network.pb'))
-        value_network = tf.keras.models.load_model(os.path.join(file_path, 'value_network.pb'))
-        reward_network = tf.keras.models.load_model(os.path.join(file_path, 'reward_network.pb'))
-        pre_con_network = PreConvolve(os.path.join(file_path, "pre_con_network.pkl"), load_from_path=True)
+    def load_networks(self, file_path='./saved-models'):
+        self.policy_network = torch.load(os.path.join(file_path, 'policy_network.pb'))
+        self.value_network = torch.load(os.path.join(file_path, 'value_network.pb'))
+        self.reward_network = torch.load(os.path.join(file_path, 'reward_network.pb'))
+        self.representation_network = torch.load(os.path.join(file_path, "representation_network.pkl"))
 
         with open(os.path.join(file_path,'meta_data.json'),'r') as g:
-            meta_data = json.load(g)
+            self.meta_data = json.load(g)
 
         print("loaded model")
-        return policy_network, value_network, reward_network, pre_con_network, meta_data
+        return self.policy_network, self.value_network, self.reward_network, self.representation_network, self.meta_data
 
-    def save_networks(self,file_path='test'):
-        self.policy_network.save(os.path.join(file_path,'policy_network.pb'), include_optimizer=False)
-        self.value_network.save(os.path.join(file_path,'value_network.pb'), include_optimizer=False)
-        self.reward_network.save(os.path.join(file_path, 'reward_network.pb'), include_optimizer=False)
-        self.pre_con_network.save(os.path.join(file_path, 'pre_con_network.pkl'))
+    def save_networks(self,file_path='./saved-models'):
+        torch.save(self.policy_network, os.path.join(file_path,'policy_network.pth'))
+        torch.save(self.value_network, os.path.join(file_path,'value_network.pth'))
+        torch.save(self.reward_network, os.path.join(file_path, 'reward_network.pth'))
+        torch.save(self.representation_network, os.path.join(file_path, 'representation_network.pth'))
 
         meta_data = {'action_size': self.action_size,
                      'training_steps': self.training_steps}
 
         with open(os.path.join(file_path, 'meta_data.json'),'w') as g:
-            json.dump(meta_data,g)
-
-
+            json.dump(self.meta_data,g)
         print("Saved model")
 
     def _value_transform(self, value_support: np.array) -> float:
@@ -110,6 +137,7 @@ class DefaultNetwork(BaseNetwork):
         """
         sigmoid =  np.piecewise(reward, [reward >= 0, reward<0], [lambda x: 1 / (1 + np.exp(-x)), lambda x: np.exp(x) / (1 + np.exp(x))])
         return sigmoid[0][0]
+    
     def _conditioned_hidden_state(self, hidden_state: np.array, action: Action) -> np.array:
         conditioned_hidden = np.concatenate((hidden_state, np.eye(self.action_size)[action.index]))
         return np.expand_dims(conditioned_hidden, axis=0)
@@ -119,187 +147,73 @@ class DefaultNetwork(BaseNetwork):
         values_exp = np.exp(values - np.max(values))
         return values_exp / np.sum(values_exp)
 
-#Full spectral convolution.
-class PreConvolve:
-    def __init__(self,
-                 file_path=None,
-                 load_from_path=False,
-                 shapes=None):
-        self.shapes = shapes
 
-        if load_from_path:
-            self.load(file_path)
-        else:
+class RepresentationNetwork(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        # variable size
+        self.conv1_init1 = conv3x3(1, 32)
+        self.conv2_init1 = conv3x3(32, 64)
+        self.adap_avg_pool1 = adaptiveAvgPool((con['input_fixed_rep_height'], con['input_fixed_rep_width']))
+        # 64 * 64
+        
+        # variable size
+        self.conv1_init2 = conv3x3(1, 32)
+        self.conv2_init2 = conv3x3(32, 64)
+        self.adap_avg_pool2 = adaptiveAvgPool((con['input_fixed_rep_height'], con['input_fixed_rep_width']))
+        # 64 * 64
+        
+        # 64 * 64
+        self.conv2_1 = conv3x3(128, 128)
+        self.conv2_2 = conv3x3(128, 256)
+        self.max_pool2 = torch.nn.MaxPool2d(2)
+        # 32 * 32
+        
+        # 32 * 32
+        self.conv3_1 = conv3x3(256, 256)
+        self.conv3_2 = conv3x3(256, 512)
+        self.max_pool3 = torch.nn.MaxPool2d(2)
+        # 16 * 16
+        
+        # 64 * 64
+        self.conv3_1_init2 = conv3x3(128, 128)
+        self.conv3_2_init2 = conv3x3(128, 256)
+        self.max_pool2_init2 = torch.nn.MaxPool2d(2)
+        # 32 * 32
+        
+        # 32 * 32
+        self.conv4_1_init2 = conv3x3(256, 256)
+        self.conv4_2_init2 = conv3x3(256, 512)
+        self.max_pool3_init2 = torch.nn.MaxPool2d(2)
+        # 16 * 16
+            
 
-            self.k = con['k']
-            #Calculate the shapes of the trainable variables using the dictionary from the configuration.
-            WA_shape = np.array([con['filters'],con['conv_in_embedd'],con['con_embedding_dim']])
-            WB_shape = np.array([con['filters'],3,con['con_embedding_dim']])
-
-            WC_shape = np.array([con['operations'],con['filters']])
-            WO_shape = np.array([con['filters'],con['con_embedding_dim'],con['final_embedding']])
-
-            C_shape = np.array([con['final_embedding'], self.k])
-            #Make trainable variables
-            self.WA_U = self.make_var(WA_shape)
-            self.WA_BU = self.make_var(WA_shape)
-            self.WA_BB = self.make_var(WB_shape)
-
-            self.WC_U = self.make_var(WC_shape)
-            self.WO_U = self.make_var(WO_shape)
-            self.WC_B = self.make_var(WC_shape)
-            self.WO_B = self.make_var(WO_shape)
-
-            self.WA_X = self.make_var(WA_shape)
-            self.WC_X = self.make_var(WC_shape)
-            self.WO_X = self.make_var(WO_shape)
-
-            self.C_K = self.make_var(C_shape)
-            self.C_Q = self.make_var(C_shape)
-            self.C_V = self.make_var(C_shape)
-
-            #Make a list of all trainable variables
-            self.weights = [self.WA_U, self.WA_BU, self.WA_BB,self.WC_U, self.WO_U, self.WC_B, self.WO_B,
-                            self.WA_X, self.WC_X, self.WO_X, self.C_K, self.C_Q, self.C_V]
-
-    def make_var(self,shape, load=None):
-        if type(load) == np.ndarray:
-            return tf.Variable(load, dtype=tf.float32)
-        else:
-            return tf.Variable(np.random.normal(0, self.He(np.product(shape)), shape), dtype=tf.float32)
-
-
-
-    def He(self,fanin):
-        """He Xavier variance calculation for initialization
-        Inputs:
-            fanin - (int) The number of input inputs to a given layer.
-        Returns: An integer corresponding to the needed variance to initialize the trainable variable."""
-        return np.sqrt(2 / fanin)
-
-    def load(self, file_path):
-        with open(file_path,'rb') as f:
-            in_dict = pickle.load(f)
-
-        #Calculate shapes
-        self.k = con['k']
-        WA_shape = np.array([con['filters'],con['conv_in_embedd'],con['con_embedding_dim']])
-        WC_shape = np.array([con['operations'],con['filters']])
-        WO_shape = np.array([con['filters'],con['con_embedding_dim'],con['final_embedding']])
-        C_shape = np.array([con['final_embedding'], self.k])
-
-        #Load each variable
-        self.WA_U = self.make_var(WA_shape, in_dict[0])
-        self.WA_BU = self.make_var(WA_shape, in_dict[1])
-        self.WA_BB = self.make_var(WA_shape, in_dict[2])
-
-        self.WC_U = self.make_var(WC_shape, in_dict[3])
-        self.WO_U = self.make_var(WO_shape, in_dict[4])
-        self.WC_B = self.make_var(WC_shape, in_dict[5])
-        self.WO_B = self.make_var(WO_shape, in_dict[6])
-
-        self.WA_X = self.make_var(WA_shape, in_dict[7])
-        self.WC_X = self.make_var(WC_shape, in_dict[8])
-        self.WO_X = self.make_var(WO_shape, in_dict[9])
-
-        self.C_K = self.make_var(C_shape, in_dict[10])
-        self.C_Q = self.make_var(C_shape, in_dict[11])
-        self.C_V = self.make_var(C_shape, in_dict[12])
-
-        self.weights = [self.WA_U, self.WA_BU, self.WA_BB, self.WC_U, self.WO_U, self.WC_B, self.WO_B,
-                        self.WA_X, self.WC_X, self.WO_X, self.C_K, self.C_Q, self.C_V]
-
-    def save(self, file_path):
-        out_dict = {}
-        for i in range(len(self.weights)):
-            out_dict[i] = np.array(self.weights[i].value())
-        with open(file_path,'wb') as g:
-            pickle.dump(out_dict,g)
-
-    def B_convolution(self, U,J,B, K):
-        step1U = tf.einsum('tnd,mde->tnme',J,self.WA_BU)
-        y1U = tf.einsum('tnqco,tqme->tncoe',U,step1U)
-
-        step1B = tf.einsum('tcf,rfg->tcrg',K,self.WA_BB)
-        y1B = tf.einsum('tcq,tqrg->tc', B, step1B)
-
-        B_con = tf.einsum('tncoe,tc->tnoe',y1U,y1B)
-
-        y2 = tf.einsum('tnoe,of->tnfe',B_con,self.WC_B)
-        y3 = tf.einsum('tnfe,fep->tnp',y2,self.WO_B)
-        return y3
-
-    def feastnet_tensor(self, U,J):
-        """
-        J - (t,n,d)
-        U - (t,n,n',c,o)
-        """
-        if U.shape[3] == 1:
-            WA = self.WA_X
-            WC = self.WC_X
-            WO = self.WO_X
-        else:
-            WA = self.WA_U
-            WC = self.WC_U
-            WO = self.WO_U
-        step1 = tf.einsum('tnd,mde->tnme',J,WA)
-        y1 = tf.einsum('tnqco,tqme->tncoe',U,step1)
-        y2 = tf.einsum('tncoe,of->tncfe',y1,WC)
-        y3 = tf.einsum('tncfe,fep->tncp',y2,WO)
-
-        K = tf.einsum('tncp, pk -> tnck', y3, self.C_K)
-        Q = tf.einsum('tncp, pk -> tnck', y3, self.C_Q)
-        V = tf.einsum('tncp, pk -> tnck', y3, self.C_V)
-
-        # preparing the mask
-
-        m_temp = tf.reduce_sum(J[:,:,0:2],-1) 
-        inf = tf.scalar_mul(-con['infinity'], tf.ones_like(m_temp))
-        m = tf.where(m_temp == 0, inf, m_temp)
-        # mask prepared
-
-        q_k = tf.einsum('tnck, tmck -> tncm', Q, K)
-        a_nc = tf.nn.softmax(tf.einsum('tncm, tn -> tncm', q_k, m) / (self.k ** 0.5), 3)
-        s_nk = tf.einsum('tncm, tmck -> tnck', a_nc, V)
-
-        return tf.nn.leaky_relu(s_nk)
-
-    def run(self,batch):
-
-        VARS = con['vars']
-        CONDITIONS = con['conditions']
-        OPERATIONS = con['operations']
-
-        U = batch[:,S['u_space'][0] : S['u_space'][1]]
-        U = tf.reshape(U,((-1, VARS,VARS, CONDITIONS + 1, OPERATIONS)))
-
-        B = batch[:,S['b_space'][0] : S['b_space'][1]]
-        B = tf.reshape(B,(-1,CONDITIONS+1, CONDITIONS+1))
-
-        X = batch[:,S['x_space'][0] : S['x_space'][1]]
-        X = tf.reshape(X,(-1, VARS,VARS, OPERATIONS))
-        X = tf.expand_dims(X,3)
-
-        J = batch[:,S['J_space'][0]: S['J_space'][1]]
-        J = tf.reshape(J,(-1,con['vars'],con['conv_in_embedd']))
-
-        K = batch[:,S['K_space'][0]: S['K_space'][1]]
-        K = tf.reshape(K, (-1, con['conditions']+1,3))
-
-        U_out = self.feastnet_tensor(U,J)
-        X_out = self.feastnet_tensor(X,J)
-        B_out = self.B_convolution(U,J,B,K)
-        # B_out = B
-
-        U_out = tf.reshape(U_out,(-1, S['u_out_shape']))
-        X_out = tf.reshape(X_out, (-1, S['x_out_shape']))
-        B_out = tf.reshape(B_out, (-1, S['b_out_shape']))
-
-        return tf.concat((U_out, B_out,X_out),1)
-
-# from sklearn.decomposition import PCA
-# import matplotlib.pyplot as plt
-# pca = PCA(n_components=2)
-# y = pca.fit_transform(x)
-# plt.scatter(y[:,0],y[:,1])
-# plt.show()
+    def forward(self, x1, x2):
+        # ouptut size = 512 * 16 * 16 for both
+        e1 = relu(self.conv1_init1(x1))
+        e1 = relu(self.conv2_init1(e1))
+        e1 = self.adap_avg_pool1(e1)
+        
+        e2 = relu(self.conv1_init2(x2))
+        e2 = relu(self.conv2_init2(e2))
+        e2 = self.adap_avg_pool2(e2)
+        
+        e = torch.cat((e1, e2), 1)
+        
+        y1 = relu(self.conv2_1(e))
+        y1 = relu(self.conv2_2(y1))
+        y1 = self.max_pool2(y1)
+        
+        y1 = relu(self.conv3_1(y1))
+        y1 = relu(self.conv3_2(y1))
+        y1 = self.max_pool3(y1)
+        
+        y2 = relu(self.conv3_1_init2(e2))
+        y2 = relu(self.conv3_2_init2(y2))
+        y2 = self.max_pool2_init2(y2)
+        
+        y2 = relu(self.conv4_1_init2(y2))
+        y2 = relu(self.conv4_2_init2(y2))
+        y2 = self.max_pool3_init2(y2)
+        
+        return y1.view(-1, 512 * 16 * 16), y2.view(-1, 512 * 16 *16)

@@ -56,7 +56,7 @@ class InitialModel(torch.nn.Module):
         self.representation_network = representation_network
 
     def call(self, image):
-        convolved_image = self.representation_network.run(image)
+        convolved_image = self.representation_network(image)
         value = self.value_network(convolved_image)
         policy_logits = self.policy_network(convolved_image)
         return value, policy_logits
@@ -71,10 +71,9 @@ class RecurrentModel(torch.nn.Module):
         self.reward_network = reward_network
         self.policy_network = policy_network
         self.representation_network = representation_network
-        self.shapes = S
 
-    def call(self, image):
-        convolved_image = self.representation_network.run(image)
+    def forward(self, image):
+        convolved_image = self.representation_network(image)
         value = self.value_network(convolved_image)
         start, end = self.shapes['x_out_space']
         X = convolved_image[:,start:end]
@@ -106,7 +105,7 @@ class BaseNetwork(AbstractNetwork):
 
     def initial_inference(self, image) -> NetworkOutput:
         """representation + prediction function"""
-        value, policy_logits = self.initial_model.predict(image)
+        value, policy_logits = self.initial_model(image)
         output = NetworkOutput(value=self._value_transform(value),
                                reward=0,
                                policy_logits=NetworkOutput.build_policy_logits(policy_logits),
