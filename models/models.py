@@ -3,10 +3,10 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Callable
 import numpy as np
 import torch
+import torch.nn as nn
 from game.game import Action
 import os
 from gym_tic.envs.Simulator import simulate, break_tensors
-from gym_tic.envs.specimen_parsers.Configure import shapes as S
 
 class NetworkOutput(typing.NamedTuple):
     value: float
@@ -49,43 +49,41 @@ class UniformNetwork(AbstractNetwork):
 class InitialModel(torch.nn.Module):
     """Model that combine the representation and prediction (value+policy) network."""
 
-    def __init__(self, value_network: torch.nn.Module, policy_network: torch.nn.Module, representation_network):
+    def __init__(self, value_network: nn.Module, policy_network: nn.Module, representation_network):
         super(InitialModel, self).__init__()
         self.value_network = value_network
         self.policy_network = policy_network
         self.representation_network = representation_network
 
-    def call(self, image):
-        convolved_image = self.representation_network(image)
-        value = self.value_network(convolved_image)
-        policy_logits = self.policy_network(convolved_image)
+    def forward(self, all_state_image, curr_state_image):
+        all_curr_encoding, curr_state_encoding = self.representation_network(all_state_image, curr_state_image)
+        value = self.value_network(all_curr_encoding)
+        policy_logits = self.policy_network(all_curr_encoding)
         return value, policy_logits
 
 
 class RecurrentModel(torch.nn.Module):
     """Model that combine the dynamic, reward and prediction (value+policy) network."""
 
-    def __init__(self,value_network: torch.nn.Module, reward_network: torch.nn.Module, policy_network: torch.nn.Module, representation_network):
+    def __init__(self,value_network: nn.Module, reward_network: nn.Module, policy_network: nn.Module, representation_network):
         super(RecurrentModel, self).__init__()
         self.value_network = value_network
         self.reward_network = reward_network
         self.policy_network = policy_network
         self.representation_network = representation_network
 
-    def forward(self, image):
-        convolved_image = self.representation_network(image)
-        value = self.value_network(convolved_image)
-        start, end = self.shapes['x_out_space']
-        X = convolved_image[:,start:end]
-        reward = self.reward_network(X)
-        policy_logits = self.policy_network(convolved_image)
+    def forward(self, all_state_image, curr_state_image):
+        all_curr_encoding, curr_state_encoding = self.representation_network(all_state_image, curr_state_image)
+        value = self.value_network(all_curr_encoding)
+        reward = self.reward_network(curr_state_encoding)
+        policy_logits = self.policy_network(all_curr_encoding)
         return value, reward, policy_logits
 
 
 class BaseNetwork(AbstractNetwork):
     """Base class that contains all the networks and models of MuZero."""
 
-    def __init__(self, value_network: torch.nn.Module, reward_network: torch.nn.Module, policy_network: torch.nn.Module, representation_network=None, load_path: str=None):
+    def __init__(self, value_network: nn.Module, reward_network: nn.Module, policy_network: nn.Module, representation_network=None, load_path: str=None):
         super().__init__()
         # Networks blocks
         self.value_network = value_network
@@ -96,11 +94,11 @@ class BaseNetwork(AbstractNetwork):
         self.initial_model = InitialModel(self.value_network, self.policy_network, self.representation_network)
         self.recurrent_model = RecurrentModel(self.value_network, self.reward_network, self.policy_network, self.representation_network)
 
-    def save_networks(self,file_path='test'):
-        self.policy_network.save(os.path.join(file_path,'policy_network.pb'))
-        self.value_network.save(os.path.join(file_path,'value_network.pb'))
-        self.reward_network.save(os.path.join(file_path, 'reward_network.pb'))
-        self.representation_network.save(os.path.join(file_path, 'representation_network.pkl'))
+    def save_networks(self,file_path='./saved-models'):
+        torch.save(self.policy_network, os.path.join(file_path,'policy_network.pth'))
+        torch.save(self.value_network, os.path.join(file_path,'value_network.pth'))
+        torch.save(self.reward_network, os.path.join(file_path, 'reward_network.pth'))
+        torch.save(self.representation_network, os.path.join(file_path, 'representation_network.pth'))
         print("Saved model")
 
     def initial_inference(self, image) -> NetworkOutput:

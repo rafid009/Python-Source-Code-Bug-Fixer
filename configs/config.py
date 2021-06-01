@@ -5,12 +5,12 @@ import tensorflow_core as tf
 from game.game import AbstractGame
 
 from gym_tic.envs.specimen_wrapper import SpecimenWrapper
-from networks.default_network import DefaultNetwork
-from networks.network import BaseNetwork, UniformNetwork
-from gym_tic.envs.specimen_parsers.Configure import configuration as con
+from models.default_network import DefaultNetwork
+from model.network import BaseNetwork, UniformNetwork
+from configs.Configure import configuration as con
 
 KnownBounds = collections.namedtuple('KnownBounds', ['min', 'max'])
-from gym_tic.envs.specimen_parsers.Configure import configuration as con
+from configs.Configure import configuration as con
 
 import os
 class MuZeroConfig(object):

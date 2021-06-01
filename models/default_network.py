@@ -2,33 +2,35 @@ import math
 
 import numpy as np
 import torch
-# from game.game import Action
+import torch.nn as nn
+import torch.nn.functional as F
+
 from models.models import BaseNetwork
+from game.game import Action
 import os
 import json
 import pickle
 
 # from networks.spectral import eigen, laplacean
 from configs.Configure import configuration as con
-# from gym_tic.envs.specimen_parsers.Configure import shapes as S
 
 from numpy.random import seed
 
 seed(1)
 
 def conv3x3(in_channels, out_channels, stride=1, padding=1):
-    return torch.nn.Conv2d(
+    return nn.Conv2d(
         in_channels, out_channels, kernel_size=3, stride=stride, padding=padding, bias=False
     )
 
 def adaptiveAvgPool(shape):
-    return torch.nn.AdaptiveAvgPool2d(shape)
+    return nn.AdaptiveAvgPool2d(shape)
 
 def adaptiveMaxPool(shape):
-    return torch.nn.AdaptiveMaxPool2d(shape)
+    return nn.AdaptiveMaxPool2d(shape)
 
 def relu(x):
-    return torch.nn.functional.relu(x)
+    return F.relu(x)
 
 class DefaultNetwork(BaseNetwork):
 
@@ -57,22 +59,22 @@ class DefaultNetwork(BaseNetwork):
             
             input_features = 512 * 16 * 16
             
-            self.value_network = torch.nn.Sequential(
-                torch.nn.Linear(input_features, con['hidden_value']),
-                torch.nn.SELU(),
-                torch.nn.Linear(con['hidden_value'], 3)
+            self.value_network = nn.Sequential(
+                nn.Linear(input_features, con['hidden_value']),
+                nn.SELU(),
+                nn.Linear(con['hidden_value'], 3)
             )
             
             self.reward_network = torch.nn.Sequential(
-                torch.nn.Linear(input_features, con['hidden_reward']),
-                torch.nn.SELU(),
-                torch.nn.Linear(con['hidden_reward'], 1)
+                nn.Linear(input_features, con['hidden_reward']),
+                nn.SELU(),
+                nn.Linear(con['hidden_reward'], 1)
             )
             
             self.reward_network = torch.nn.Sequential(
-                torch.nn.Linear(input_features, con['hidden_policy']),
-                torch.nn.SELU(),
-                torch.nn.Linear(con['hidden_policy'], action_size)
+                nn.Linear(input_features, con['hidden_policy']),
+                nn.SELU(),
+                nn.Linear(con['hidden_policy'], action_size)
             )
             
             # value_network = torch.nn.Sequential([Dense(con['hidden_value'], activation='selu', kernel_regularizer=regularizer,
@@ -96,10 +98,10 @@ class DefaultNetwork(BaseNetwork):
         super().__init__(self.value_network, self.reward_network, self.policy_network, self.representation_network, load_path=load_path)
 
     def load_networks(self, file_path='./saved-models'):
-        self.policy_network = torch.load(os.path.join(file_path, 'policy_network.pb'))
-        self.value_network = torch.load(os.path.join(file_path, 'value_network.pb'))
-        self.reward_network = torch.load(os.path.join(file_path, 'reward_network.pb'))
-        self.representation_network = torch.load(os.path.join(file_path, "representation_network.pkl"))
+        self.policy_network = torch.load(os.path.join(file_path, 'policy_network.pth'))
+        self.value_network = torch.load(os.path.join(file_path, 'value_network.pth'))
+        self.reward_network = torch.load(os.path.join(file_path, 'reward_network.pth'))
+        self.representation_network = torch.load(os.path.join(file_path, "representation_network.pth"))
 
         with open(os.path.join(file_path,'meta_data.json'),'r') as g:
             self.meta_data = json.load(g)
@@ -166,25 +168,25 @@ class RepresentationNetwork(torch.nn.Module):
         # 64 * 64
         self.conv2_1 = conv3x3(128, 128)
         self.conv2_2 = conv3x3(128, 256)
-        self.max_pool2 = torch.nn.MaxPool2d(2)
+        self.max_pool2 = nn.MaxPool2d(2)
         # 32 * 32
         
         # 32 * 32
         self.conv3_1 = conv3x3(256, 256)
         self.conv3_2 = conv3x3(256, 512)
-        self.max_pool3 = torch.nn.MaxPool2d(2)
+        self.max_pool3 = nn.MaxPool2d(2)
         # 16 * 16
         
         # 64 * 64
         self.conv3_1_init2 = conv3x3(128, 128)
         self.conv3_2_init2 = conv3x3(128, 256)
-        self.max_pool2_init2 = torch.nn.MaxPool2d(2)
+        self.max_pool2_init2 = nn.MaxPool2d(2)
         # 32 * 32
         
         # 32 * 32
         self.conv4_1_init2 = conv3x3(256, 256)
         self.conv4_2_init2 = conv3x3(256, 512)
-        self.max_pool3_init2 = torch.nn.MaxPool2d(2)
+        self.max_pool3_init2 = nn.MaxPool2d(2)
         # 16 * 16
             
 
@@ -198,7 +200,7 @@ class RepresentationNetwork(torch.nn.Module):
         e2 = relu(self.conv2_init2(e2))
         e2 = self.adap_avg_pool2(e2)
         
-        e = torch.cat((e1, e2), 1)
+        e = torch.cat((e1, e2), 0)
         
         y1 = relu(self.conv2_1(e))
         y1 = relu(self.conv2_2(y1))
@@ -216,4 +218,4 @@ class RepresentationNetwork(torch.nn.Module):
         y2 = relu(self.conv4_2_init2(y2))
         y2 = self.max_pool3_init2(y2)
         
-        return y1.view(-1, 512 * 16 * 16), y2.view(-1, 512 * 16 *16)
+        return (y1.view(-1, 512 * 16 * 16), y2.view(-1, 512 * 16 *16))
