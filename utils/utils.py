@@ -48,6 +48,7 @@ class Node(object):
         self.children = {}
         self.hidden_state = None
         self.reward = 0
+        self.ast = ''
 
     def expanded(self) -> bool:
         return len(self.children) > 0

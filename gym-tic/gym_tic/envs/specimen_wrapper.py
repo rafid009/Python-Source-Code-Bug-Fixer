@@ -53,5 +53,5 @@ class SpecimenWrapper(AbstractGame):
 
     def make_image(self, state_index: int):
         """Compute the state of the game."""
-        return self.observations[state_index].astype(np.float32)
+        return (self.observations[state_index][0].astype(np.float32), self.observations[state_index][1].astype(np.float32))
 

@@ -7,10 +7,12 @@ import numpy as np
 import copy
 # import Configure as con
 from configs.Configure import configuration as con
+from configs.Configure import state_tensors_key, state_key_tensors
 from configs.Configure import embedding_model
 from .specimen_parsers.array_maker import TensorRep
 import copy
-
+from utils.utils import *
+import json
 
 class SpecimenEnv(gym.Env):
 
@@ -34,21 +36,45 @@ class SpecimenEnv(gym.Env):
         self.current_node = 0
 
 
-    def _get_specimens(self, file_path):#filepath: file to answer or json
+    def _get_specimens(self, file_path_ast, file_path_answers, file_path_states):#filepath: file to answer or json
         specimens = {}
-        files = os.listdir(file_path)
+        files = os.listdir(file_path_ast)
         for file in files:
-            name = file.split("_answers")[0].split(".json")[0]
-            if name not in specimens.keys() and (".json" in file or "_answers" in file):
-                specimens[name] = {"spec": "", "answer": ""}
+            name = file.split(".json")[0]
+            if name not in specimens.keys() and (".json" in file):
+                specimens[name] = {"ast": ""}
             if ".json" in file:
-                specimens[name]['spec'] = file
-            elif "_answers" in file:
+                specimens[name]['ast'] = file
+
+
+        files = os.listdir(file_path_answers)
+        for file in files:
+            name = file.split("_answers")[0]
+            if name not in specimens.keys() and (".json" in file or "_answers" in file):
+                specimens[name]['answer'] = ""
+            if "_answers" in file:
                 specimens[name]['answer'] = file
+
+        files = os.listdir(file_path_states)
+        for key, file in files:
+            name = key.split("_answers")[0].split(".json")[0]
+            if name not in specimens.keys() and (".json" in file):
+                specimens[name]['states'] = ''
+            if ".json" in file:
+                specimens[name]['states'] = files[key]
+            
         return specimens
 
     def get_reachability_map(self):
     
+        map_dict = {
+            0 : [1, 2],
+            1 : [3, 4],
+            2 : [3, 4],
+            3 : [5],
+            4 : [5],
+            5 : []
+        }
         B = np.where(self.tensors['B'] > 0, 1, 0)
         map_dict = {}
         for node in range(B.shape[0]):
@@ -71,33 +97,27 @@ class SpecimenEnv(gym.Env):
                     ast_slice.append(ast[i])
                 return ast_slice
 
-            i = 0
-            for filename in os.listdir(train_folder):
-                if i > 2:
-                    break
-                json_list = to_string_list(json.loads(open(train_folder+filename).read()))
-                slices = processed_dict[filename]['paths']
-                print('full ast: ', embedding_model.get_tensor_representaion(json_list).size())
-                for key in slices.keys():
+            
+            specimen_path, failure_paths, state_paths = self._select_specimen()
+            json_list = to_string_list(json.loads(open(train_folder+specimen_path).read()))
+            slices = processed_dict[specimen_path]['paths']
+            
+            tensors_ast = embedding_model.get_tensor_representaion(json_list)
+            
+            tensor_states = {}
+            for key in slices.keys():
                     slice = get_ast_path(slices[key], json_list)
-                    print(key, '\n', embedding_model.get_tensor_representaion(slice).size())
-                    i += 1
+                    embed = embedding_model.get_tensor_representaion(slice)
+                    tensor_states[key] = embed
+                    state_tensors_key[embed] = key
+               
 
-                specimen_path, failure_paths = self._select_specimen()
-                array_builder = TensorRep(specimen_path, print_tokens=con['print_tokens'])
-                tensors = array_builder.make_tensor()
-                if tensors == None:
-                    return build_specimen()
-                return specimen_path, failure_paths, array_builder, tensors
-            # specimen_path, failure_paths = self._select_specimen()
-            # array_builder = TensorRep(specimen_path, print_tokens=con['print_tokens'])
-            # tensors = array_builder.make_tensor()
-            # if tensors == None:
-            #     return build_specimen()
-            # return specimen_path, failure_paths, array_builder, tensors
+            state_key_tensors = tensor_states
+
+            return specimen_path, failure_paths, tensors_ast, tensor_states
 
 
-        self.specimen_path, self.failure_paths, self.array_builder, self.tensors = build_specimen()
+        self.specimen_path, self.failure_paths, self.tensors_ast, self.tensors_states = build_specimen()
 
 
         # self.failure_state = self.get_failure_state(self.failure_path)
@@ -109,34 +129,37 @@ class SpecimenEnv(gym.Env):
         return self.get_state_array()
 
     def get_reachable_branches(self):
-        # Eliminate the negative elements of the adjancency matrix B (we do not need edges ariving at the node.)
-        B = np.where(self.tensors['B'] > 0, 1, 0)
-        # Obrain the indices of the conditions that are reachable from this node.
-        branches = np.nonzero(B[self.current_node])
-        # Convert the tuple "branches" into an array.  Ofset it by 1 since the starting branch does not have a
-        # corresponding action.
 
-        return np.array(branches, dtype=np.int32)[0]
+        map_dict = {
+            0 : [1, 2],
+            1 : [3, 4],
+            2 : [3, 4],
+            3 : [5],
+            4 : [5],
+            5 : []
+        }
+
+        return np.array(map_dict[self.current_node], dtype=np.int32)[0]
 
     def seed(self, seed=1):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def get_failure_state(self, failure_path):
-        # failure path is offset by 1.  Initialization condition is condition 0. The first condition is condition 1
-        fail_state = copy.deepcopy(self.tensors['U'][:, :, 0, :])
-        for condition in failure_path:
-            fail_state += self.tensors['U'][:, :, condition, :]
-        return fail_state
+        path_str = ''
+
+        for i in failure_path:
+            path_str = path_str + str(i) + '-'
+        path_str = path_str[:-1]
+
+        return self.tensor_states[path_str]
+        
+
 
     def get_state_array(self):
 
-
-        return np.concatenate((self.tensors['U'].flatten(),
-                               self.tensors['B'].flatten(),
-                               self.tensors['X'].flatten(),
-                               self.tensors['J'].flatten(), #con['vars'], con['max_support']+3
-                               self.tensors['K'].flatten())) #con['conditions'], 3
+        return (self.tensors_ast, self.tensors_states)
+        
 
     def check_against_ground(self, actions_taken=[1], failure_paths=[[None]]):
         result = False
@@ -169,15 +192,24 @@ class SpecimenEnv(gym.Env):
         if not self.done:
             self.branches_taken.append(action.index + 1)
             # Take slice of U to represent the current move.
-            slice = copy.deepcopy(self.tensors['U'][:, :, action.index + 1, :])
+            
+            path_str = ''
+
+            for i in self.branches_taken:
+                path_str = path_str + str(i) + '-'
+            path_str = path_str[:-1]
+            
+            slice = copy.deepcopy(self.self.tensor_states[path_str])
+
             # Add the current move to the state involving all previous moves.
-            self.tensors['X'] = self.tensors['X'] + np.expand_dims(slice, 2)
+            # self.tensors['X'] = self.tensors['X'] + np.expand_dims(slice, 2)
 
             state_array = self.get_state_array()
             self.counter += 1
+
         # If There are no nodes reachable by the current node, we have reached the end of the specimen program.
         condition_tensor = np.where(self.tensors['B'] == 1, 1, 0)
-        if np.sum(condition_tensor[self.current_node]) == 0:
+        if action.index ==  4:
             self.done = True
 
         # Actions are zero indexed while nodes are 1 indexed.
@@ -197,8 +229,9 @@ class SpecimenEnv(gym.Env):
         # spec_name = 'spec5994'
         # print(spec_name)
 
-        raw_file = os.path.join(self.file_path, self.specimens[spec_name]['spec'])
+        raw_file = os.path.join(self.file_path, self.specimens[spec_name]['ast'])
         answer_file = os.path.join(self.file_path, self.specimens[spec_name]['answer'])
+        state_file = os.path.join(self.file_path, self.specimens[spec_name]['answer'])
         if os.path.exists(raw_file) and self.specimens[spec_name]['answer'] != '':
             with open(answer_file, 'r') as f:
                 answers = f.read()
@@ -210,7 +243,7 @@ class SpecimenEnv(gym.Env):
                 if len(answer) > 0:
                     failure_path = np.array([a.strip() for a in answer.split(",")]).astype(np.int32)
                     failure_paths.append(failure_path)
-            return raw_file, failure_paths
+            return raw_file, failure_paths, state_file
         else:
             return self._select_specimen()
 
@@ -237,10 +270,11 @@ class SpecimenEnv(gym.Env):
 
         return self.get_state_array()
 
-    def render(self, mode='text'):
+    def render(self, mode='text', initial_node=False):
         """
         Draws the board to the screen
         """
+        
         if self.render_this:
             # In order to account for a null element, the argmax is multiplied by the sum along the f axis so that
             # zeros in the sum will eliminate elements that are supposed to be blank.
@@ -249,12 +283,18 @@ class SpecimenEnv(gym.Env):
             # print(self.branches_taken)
             # print("Correct actions:")
             # print(self.failure_path)
-            self.array_builder.render(self.tensors['X'][:, :, 0, :])
+
+            if initial_node = True:
+                return (self.tensors_ast, self.tensors_states['0'])
+            
+            path_str = ''
+
+            for i in self.branches_taken:
+                path_str = path_str + str(i) + '-'
+            path_str = path_str[:-1]
+            
+            return (self.tensors_ast, self.tensors_states[path_str])
+
 
     def close(self):
         pass
-
-
-if __name__ == "__main__":
-    file_path = "/Users/arrenbustamante/Documents/BinMorph/MuZero/MuZero Old/gym-tic/gym_tic/envs/specimen_parsers/specimen_raw.py"
-    SpecimenEnv(file_path=file_path)

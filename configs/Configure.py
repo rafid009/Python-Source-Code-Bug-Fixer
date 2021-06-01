@@ -63,5 +63,7 @@ else:
     configuration['save_path'] = configuration['save_path_Arren']
     configuration['load_path'] = configuration['load_path_Arren']
 
+state_key_tensors =  {}
+state_tensors_key =  {}
 
 
