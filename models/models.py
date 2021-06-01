@@ -12,7 +12,7 @@ class NetworkOutput(typing.NamedTuple):
     value: float
     reward: float
     policy_logits: Dict[Action, float]
-    hidden_state: typing.Optional[List[float]]
+    hidden_state: typing.Optional[List[float]] #change later
 
     @staticmethod
     def build_policy_logits(policy_logits):
