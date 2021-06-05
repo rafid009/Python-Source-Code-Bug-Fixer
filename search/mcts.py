@@ -48,8 +48,8 @@ def run_mcts(config: MuZeroConfig, root: Node, action_history: ActionHistory, ne
         # Inside the search tree we use the dynamics function to obtain the next
         # hidden state given an action and the previous hidden state.
         parent = search_path[-2]
-
-        network_output = network.recurrent_inference((parent.hidden_state[0], parent.hidden_state[1]), history.history, history.last_action())
+        actions = [(act.index + 1) for act in history.history]
+        network_output = network.recurrent_inference(parent.hidden_state, actions)
 
         last_tensor_slice = action.index+1
         valid_action_indices = np.array(reachability[last_tensor_slice]) - 1

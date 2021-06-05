@@ -113,9 +113,9 @@ class BaseNetwork(AbstractNetwork):
                                hidden_state=image)
         return output
 
-    def recurrent_inference(self, input_state, prev_actions, action: Action) -> NetworkOutput:
+    def recurrent_inference(self, input_state, actions) -> NetworkOutput:
         """dynamics + prediction function"""
-        new_state = simulate(input_state, prev_actions, action.index+1)
+        new_state = simulate(input_state, actions)
         value, reward, policy_logits = self.recurrent_model(new_state)
         output = NetworkOutput(value=self._value_transform(value),
                                reward=reward,

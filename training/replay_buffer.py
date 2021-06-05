@@ -23,7 +23,7 @@ class ReplayBuffer(object):
         # Generate some sample of data to train on
         games = self.sample_games()
         game_pos = [(g, self.sample_position(g)) for g in games]
-        game_data = [(g.make_image(i), g.history[i:i + num_unroll_steps],
+        game_data = [(g.make_image(i), g.history[0:i + num_unroll_steps],
                       g.make_target(i, num_unroll_steps, td_steps, g.to_play()), g)
                      for (g, i) in game_pos]
 

@@ -137,3 +137,20 @@ def get_index_from_action_history(action_history=[], key=''):
         for action in action_history:
             path_str += '-' + str(action.index + 1)
     return state_to_index[path_str]
+
+def get_index_from_action_path(path_str='ast'):
+    state_to_index = {
+        '0': 0,
+        '0-1': 1,
+        '0-1-3': 2,
+        '0-1-4': 3,
+        '0-1-3-5': 4,
+        '0-1-4-5': 5,
+        '0-2': 6,
+        '0-2-3': 7,
+        '0-2-4': 8,
+        '0-2-3-5': 9,
+        '0-2-4-5': 10,
+        'ast': 11
+    }
+    return state_to_index[path_str]

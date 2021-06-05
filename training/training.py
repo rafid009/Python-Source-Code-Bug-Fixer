@@ -114,7 +114,7 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
             games1 = [games0[g] for g in range(len(games0)) if dynamic_mask[g]]
             target_value_batch = torch.masked_select(target_value_batch, mask)
             # Creating conditioned_representation: concatenate representations with actions batch
-            actions_batch = F.one_hot(actions_batch, network.action_size)
+            # actions_batch = F.one_hot(actions_batch, network.action_size)
 
             image1 = simulate(image_batch, actions_batch)
             # Recurrent step from conditioned representation: recurrent + prediction networks
@@ -135,7 +135,7 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
 
             if network.record_this and i == 0:
                 recorder.add_policy(policy_batch,target_policy_batch)
-                recorder.add_representation(image1, network.representation_network(image1[0], image1[1]))
+                recorder.add_representation(image1, network.representation_network(image1))
                 recorder.add_value(torch.squeeze(value_batch), target_value_batch)
                 recorder.add_reward(reward_batch,target_reward_batch1)
                 recorder.compile()
