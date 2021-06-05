@@ -6,10 +6,10 @@ from typing import List
 
 import numpy
 
-from config import MuZeroConfig
+from configs.config import MuZeroConfig
 from game.game import Player, Action, ActionHistory
-from networks.network import NetworkOutput, BaseNetwork
-from self_play.utils import MinMaxStats, Node, softmax_sample
+from models.models import NetworkOutput, BaseNetwork
+from utils.utils import MinMaxStats, Node, softmax_sample
 import numpy as np
 import random
 random.seed(1)
@@ -49,10 +49,10 @@ def run_mcts(config: MuZeroConfig, root: Node, action_history: ActionHistory, ne
         # hidden state given an action and the previous hidden state.
         parent = search_path[-2]
 
-        network_output = network.recurrent_inference((parent.hidden_state[0], parent.hidden_state[1]), history.last_action())
+        network_output = network.recurrent_inference((parent.hidden_state[0], parent.hidden_state[1]), history.history, history.last_action())
 
         last_tensor_slice = action.index+1
-        valid_action_indices = np.array(reachability[last_tensor_slice])-1
+        valid_action_indices = np.array(reachability[last_tensor_slice]) - 1
         valid_actions = [history.action_space()[action_index] for action_index in valid_action_indices]
 
         expand_node(node, history.to_play(), valid_actions, network_output)

@@ -1,16 +1,14 @@
 import collections
 from typing import Optional, Dict
 
-import tensorflow_core as tf
 from game.game import AbstractGame
 
 from gym_tic.envs.specimen_wrapper import SpecimenWrapper
 from models.default_network import DefaultNetwork
-from model.network import BaseNetwork, UniformNetwork
+from models.models import BaseNetwork, UniformNetwork
 from configs.Configure import configuration as con
 
 KnownBounds = collections.namedtuple('KnownBounds', ['min', 'max'])
-from configs.Configure import configuration as con
 
 import os
 class MuZeroConfig(object):
@@ -92,19 +90,19 @@ class MuZeroConfig(object):
         return game
 
     def new_network(self) -> BaseNetwork:
-        return self.network(**self.network_args)
+        return self.network(**self.network_args).cuda()
 
     def uniform_network(self) -> UniformNetwork:
-        return UniformNetwork(self.action_space_size)
+        return UniformNetwork(self.action_space_size).cuda()
 
-    def new_optimizer(self) -> tf.keras.optimizers:
+    def new_optimizer(self) -> Dict:
         # return tf.keras.optimizers.SGD(learning_rate=self.lr, momentum=self.momentum)
         if con['continue_training']:
             import pickle
             with open(os.path.join(con['load_path'], 'optimizer.pkl'),'rb') as f:
                 optimizer = pickle.load(f)
         else:
-            optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr, clipvalue=1.0)
+            optimizer = {'type': 'adam', 'lr': self.lr}#tf.keras.optimizers.Adam(learning_rate=self.lr, clipvalue=1.0)
         return optimizer
 
 

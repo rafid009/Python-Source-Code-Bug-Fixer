@@ -4,6 +4,8 @@ from typing import Dict
 import numpy as np
 import torch
 import torch.nn.functional as F
+import torch.optim as optim
+from torch.autograd import Variable
 import torch.nn as nn
 
 from configs.config import MuZeroConfig
@@ -19,14 +21,14 @@ import logging
 def train_network(config: MuZeroConfig, storage: SharedStorage, replay_buffer: ReplayBuffer, epochs: int, loop:int):
     network = storage.current_network
     optimizer_info = storage.optimizer_info
-    # network.loop = loop
+    network.loop = loop
     for i in range(epochs):
         batch = replay_buffer.sample_batch(config.num_unroll_steps, config.td_steps)
-        # if i == 0:
-            # network.record_this = storage.record_this
+        if i == 0:
+            network.record_this = storage.record_this
         update_weights(optimizer_info, network, batch)
         storage.save_network(network.training_steps, network)
-        # storage.record_this = network.record_this
+        storage.record_this = network.record_this
 
 
 
@@ -46,50 +48,15 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
 
         batch_size = len(target_value_batch)
         targets = np.zeros((batch_size, 4))
-        # This is normally not abs
-
-        # target_value_batch =abs(np.array(target_value_batch))
-        # sqrt_value = np.sqrt(target_value_batch)
         floor_value = np.floor(target_value_batch).astype(int)
-
-        # floor_value = np.floor(target_value_batch).astype(int)
         rest = target_value_batch - floor_value
         targets[range(batch_size), floor_value.astype(int)+1] = 1 - rest
         targets[range(batch_size), floor_value.astype(int) + 2] = rest
         targets = targets[:,0:3]
-
-
         value_loss = F.cross_entropy(value_batch, targets)
-        # value_loss_boosted = (2 + targets)[:, 2] * value_loss
         return torch.mean(value_loss)
-        # epsilon = 1e-6
-        # target_value_batch = tf.convert_to_tensor(np.array(target_value_batch).astype(np.float32))
-        #
-        # target_pos = tf.nn.relu(target_value_batch)
-        # target_zer = tf.where(tf.abs(target_value_batch) < epsilon, 1.0, 0.0)
-        # target_neg = tf.nn.relu(-target_value_batch)
-        #
-        # targets = tf.stack((target_neg,target_zer, target_pos),1)
-        #
-        # #boost
-        # value_loss = tf.nn.softmax_cross_entropy_with_logits(labels=targets, logits=value_batch)
-        # # value_loss_boosted = tf.expand_dims((1+targets)[:,2],-1)* value_loss
-        #
-        # return tf.reduce_mean(value_loss)
 
     def calculate_policy_loss(policy_batch=None, target_policy_batch=None):
-        # policy_mask = tf.nn.relu(target_policy_batch)
-        # policy_loss = tf.reduce_sum(-target_policy_batch * tf.nn.log_softmax(tf.nn.relu(policy_mask*policy_batch)),-1)
-        # policy_loss = tf.reduce_mean(policy_loss)
-        # policy_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=target_policy_batch, logits=policy_batch))
-        # print("policy loss:", round(float(policy_loss),3), "value loss", round(float(value_loss),3))
-        # policy_loss = tf.reduce_mean(
-        #     tf.nn.softmax_cross_entropy_with_logits(labels=target_policy_batch, logits=policy_batch))
-
-        # p = tf.nn.softmax(policy_batch)
-        # policy_loss = -target_policy_batch * tf.keras.backend.log(p)
-        # return tf.reduce_mean(policy_loss)
-
         p = policy_batch
         pi = target_policy_batch
 
@@ -99,7 +66,7 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
         negatives = torch.full(pi.shape, -100.0)
         p = torch.where(where, negatives, p)
 
-        loss = F.cross_entropy(labels=pi, logits=p)
+        loss = F.cross_entropy(p, pi)
 
         return torch.mean(loss)
 
@@ -109,7 +76,7 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
 
 
         # Initial step, from the real observation: representation + prediction networks
-        value_batch, policy_batch = network.initial_model(np.array(image_batch))
+        value_batch, policy_batch = network.initial_model(Variable(torch.from_numpy(image_batch)).cuda())
 
         # Only update the element with a policy target
         target_value_batch, target_reward_batch1, target_policy_batch = zip(*targets_init_batch)
@@ -120,7 +87,7 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
 
 
         if network.record_this:
-            convolved_image = network.representation_network(torch.from_numpy(np.array(image_batch[0]).astype(np.float32)), torch.from_numpy(np.array(image_batch[1]).astype(np.float32)))
+            convolved_image = network.representation_network(Variable(torch.from_numpy(np.array(image_batch).astype(np.float32))).cuda())
             recorder = Recorder()
             recorder.add_representation(image_batch, convolved_image)
             recorder.add_value(torch.squeeze(value_batch), target_value_batch)
@@ -151,7 +118,7 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
 
             image1 = simulate(image_batch, actions_batch)
             # Recurrent step from conditioned representation: recurrent + prediction networks
-            value_batch, reward_batch, policy_batch = network.recurrent_model(image1)
+            value_batch, reward_batch, policy_batch = network.recurrent_model(Variable(image1).cuda())
 
             # Only execute BPTT for elements with a policy target
             target_policy_batch = [policy for policy, b in zip(target_policy_batch, mask) if b]
@@ -201,7 +168,7 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
             image_batch = image1
             target_reward_batch1 = target_reward_batch2
 
-        l2_loss = L2(network.representation_network.weights)
+        l2_loss = L2(network.representation_network.parameters())
 
         if network.loop < con['start_reward_train']:
             loss = reward_loss
@@ -212,7 +179,11 @@ def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
         logging.info(loss_string)
         print(loss_string)
         return loss
-    optimizer.minimize(loss=loss, var_list=network.cb_get_variables())
+    optimizer = optim.Adam(network.cb_get_variables(), lr=optimizer_info['lr'])
+    optimizer.zero_grad()
+    loss = loss()
+    loss.backward()
+    optimizer.step()
     network.training_steps += 1
 
 

@@ -2,6 +2,7 @@ import pickle
 import numpy as np
 from configs.Configure import configuration as con
 import torch
+import torch.nn.functional as F
 import os
 
 
@@ -45,19 +46,19 @@ class Recorder:
 
 
     def add_representation(self, rep, target_rep):
-        self.state['representation'].append(np.array(rep))
-        self.target['representation'].append(np.array(target_rep))
+        self.state['representation'].append((np.array(rep[0]), np.array(rep[1])))
+        self.target['representation'].append((np.array(target_rep[0]), np.array(target_rep[1])))
 
     def add_reward(self, reward, target_reward):
         self.state['reward'].append(np.array(reward))
         self.target['reward'].append(np.array(target_reward))
 
     def add_value(self, value, target_value):
-        self.state['value'].append(np.array(tf.nn.softmax(value)))
+        self.state['value'].append(np.array(F.softmax(value)))
         self.target['value'].append(np.array(self.loss_value(target_value)))
 
     def add_policy(self, policy, target_policy):
-        self.state['policy'].append(np.array(tf.nn.softmax(policy)))
+        self.state['policy'].append(np.array(F.softmax(policy)))
         self.target['policy'].append(np.array(target_policy))
 
     def add_dynamic(self, dynamic, target_dynamic):
@@ -79,7 +80,7 @@ class Recorder:
         epsilon = 1e-4
         target_pos = torch.from_numpy(target_value_batch)
         target_zer = torch.from_numpy(torch.abs(target_value_batch) < epsilon, 1.0, 0.0)
-        target_neg = torch.nn.functional.relu(-target_value_batch)
+        target_neg = F.relu(-target_value_batch)
 
         targets = torch.stack((target_neg,target_zer, target_pos),1)
 

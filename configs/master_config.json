@@ -22,13 +22,20 @@
     "spectral_weight_decay": 1E-4,
     "infinity":10E4,
 
-    
+    "U_channels": 12,
+    "U_height": 128,
+    "X_channel": 1,
+    "X_height": 128,
+    "U_out_channel": 256,
+    "U_out_size": 16,
+    "X_out_channel": 256,
+    "X_out_size": 16,
     "conditions": 5,
     "filters": 64,
     "input_fixed_rep_height": 64,
     "input_fixed_rep_width": 64,
     "con_embedding_dim": 64,
-    "final_embedding": 128,
+    "ast_embedding_size": 128,
     "k": 200,
     "device": "/CPU:0",
 

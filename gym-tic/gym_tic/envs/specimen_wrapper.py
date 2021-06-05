@@ -3,10 +3,10 @@ from typing import List
 # from .gamesFolder import gym
 import gym
 from game.game import Action, AbstractGame
-from game.gym_wrappers import ScalingObservationWrapper
+from game.game_wrappers import ScalingObservationWrapper
 from gym import wrappers, logger
 # from .specimen_parsers import game_config
-from gym_tic.envs.specimen_parsers.Configure import configuration as con
+from configs.Configure import configuration as con
 import numpy as np
 from copy import deepcopy
 
@@ -53,5 +53,5 @@ class SpecimenWrapper(AbstractGame):
 
     def make_image(self, state_index: int):
         """Compute the state of the game."""
-        return (self.observations[state_index][0].astype(np.float32), self.observations[state_index][1].astype(np.float32))
+        return self.observations[state_index].astype(np.float32)
 

@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.modules import conv
 
 from models.models import BaseNetwork
 from game.game import Action
@@ -13,6 +14,7 @@ import pickle
 
 # from networks.spectral import eigen, laplacean
 from configs.Configure import configuration as con
+from configs.Configure import shapes
 
 from numpy.random import seed
 
@@ -55,27 +57,27 @@ class DefaultNetwork(BaseNetwork):
         else:
             self.action_size = action_size
 
-            self.representation_network = RepresentationNetwork()
+            self.representation_network = RepresentationNetwork().cuda()
             
-            input_features = 512 * 16 * 16
+            input_features = shapes['output_size']
             
             self.value_network = nn.Sequential(
                 nn.Linear(input_features, con['hidden_value']),
                 nn.SELU(),
                 nn.Linear(con['hidden_value'], 3)
-            )
+            ).cuda()
             
-            self.reward_network = torch.nn.Sequential(
-                nn.Linear(input_features, con['hidden_reward']),
+            self.reward_network = nn.Sequential(
+                nn.Linear(shapes['x_out_shape'], con['hidden_reward']),
                 nn.SELU(),
                 nn.Linear(con['hidden_reward'], 1)
-            )
+            ).cuda()
             
-            self.reward_network = torch.nn.Sequential(
+            self.reward_network = nn.Sequential(
                 nn.Linear(input_features, con['hidden_policy']),
                 nn.SELU(),
                 nn.Linear(con['hidden_policy'], action_size)
-            )
+            ).cuda()
             
             # value_network = torch.nn.Sequential([Dense(con['hidden_value'], activation='selu', kernel_regularizer=regularizer,
             #                                   kernel_initializer='lecun_normal', bias_initializer="lecun_normal",
@@ -140,8 +142,8 @@ class DefaultNetwork(BaseNetwork):
         sigmoid =  np.piecewise(reward, [reward >= 0, reward<0], [lambda x: 1 / (1 + np.exp(-x)), lambda x: np.exp(x) / (1 + np.exp(x))])
         return sigmoid[0][0]
     
-    def _conditioned_hidden_state(self, hidden_state: np.array, action: Action) -> np.array:
-        conditioned_hidden = np.concatenate((hidden_state, np.eye(self.action_size)[action.index]))
+    def _conditioned_hidden_state(self, hidden_state, action: Action) -> np.array:
+        conditioned_hidden = np.concatenate((hidden_state[1], np.eye(self.action_size)[action.index]))
         return np.expand_dims(conditioned_hidden, axis=0)
 
     def _softmax(self, values):
@@ -153,69 +155,68 @@ class DefaultNetwork(BaseNetwork):
 class RepresentationNetwork(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        # variable size
-        self.conv1_init1 = conv3x3(1, 32)
-        self.conv2_init1 = conv3x3(32, 64)
-        self.adap_avg_pool1 = adaptiveAvgPool((con['input_fixed_rep_height'], con['input_fixed_rep_width']))
-        # 64 * 64
+        # for U
+        self.conv1_1_U = conv3x3(12, 32)
+        self.conv1_2_U = conv3x3(32, 64)
+        self.max_pool_1_U = nn.MaxPool2d(2)
         
-        # variable size
-        self.conv1_init2 = conv3x3(1, 32)
-        self.conv2_init2 = conv3x3(32, 64)
-        self.adap_avg_pool2 = adaptiveAvgPool((con['input_fixed_rep_height'], con['input_fixed_rep_width']))
-        # 64 * 64
+        self.conv2_1_U = conv3x3(64, 64)
+        self.conv2_2_U = conv3x3(64, 128)
         
-        # 64 * 64
-        self.conv2_1 = conv3x3(128, 128)
-        self.conv2_2 = conv3x3(128, 256)
-        self.max_pool2 = nn.MaxPool2d(2)
-        # 32 * 32
+        self.max_pool_2_U = nn.MaxPool2d(2)
         
-        # 32 * 32
-        self.conv3_1 = conv3x3(256, 256)
-        self.conv3_2 = conv3x3(256, 512)
-        self.max_pool3 = nn.MaxPool2d(2)
-        # 16 * 16
+        self.conv3_1_U = conv3x3(128, 128)
+        self.conv3_2_U = conv3x3(128, 256)
         
-        # 64 * 64
-        self.conv3_1_init2 = conv3x3(128, 128)
-        self.conv3_2_init2 = conv3x3(128, 256)
-        self.max_pool2_init2 = nn.MaxPool2d(2)
-        # 32 * 32
+        self.max_pool_3_U = nn.MaxPool2d(2)
         
-        # 32 * 32
-        self.conv4_1_init2 = conv3x3(256, 256)
-        self.conv4_2_init2 = conv3x3(256, 512)
-        self.max_pool3_init2 = nn.MaxPool2d(2)
+        # for X
+        self.conv1_1_X = conv3x3(12, 32)
+        self.conv1_2_X = conv3x3(32, 64)
+        self.max_pool_1_X = nn.MaxPool2d(2)
+        
+        self.conv2_1_X = conv3x3(64, 64)
+        self.conv2_2_X = conv3x3(64, 128)
+        
+        self.max_pool_2_X = nn.MaxPool2d(2)
+        
+        self.conv3_1_X = conv3x3(128, 128)
+        self.conv3_2_X = conv3x3(128, 256)
+        
+        self.max_pool_3_X = nn.MaxPool2d(2)
+        
+        
         # 16 * 16
             
 
-    def forward(self, x1, x2):
-        # ouptut size = 512 * 16 * 16 for both
-        e1 = relu(self.conv1_init1(x1))
-        e1 = relu(self.conv2_init1(e1))
-        e1 = self.adap_avg_pool1(e1)
-        
-        e2 = relu(self.conv1_init2(x2))
-        e2 = relu(self.conv2_init2(e2))
-        e2 = self.adap_avg_pool2(e2)
-        
-        e = torch.cat((e1, e2), 0)
-        
-        y1 = relu(self.conv2_1(e))
-        y1 = relu(self.conv2_2(y1))
-        y1 = self.max_pool2(y1)
-        
-        y1 = relu(self.conv3_1(y1))
-        y1 = relu(self.conv3_2(y1))
-        y1 = self.max_pool3(y1)
-        
-        y2 = relu(self.conv3_1_init2(e2))
-        y2 = relu(self.conv3_2_init2(y2))
-        y2 = self.max_pool2_init2(y2)
-        
-        y2 = relu(self.conv4_1_init2(y2))
-        y2 = relu(self.conv4_2_init2(y2))
-        y2 = self.max_pool3_init2(y2)
-        
-        return (y1.view(-1, 512 * 16 * 16), y2.view(-1, 512 * 16 *16))
+    def forward(self, image_batch):
+        # ouptut size = 256 * 16 * 16 for both
+        U = image_batch[:, shapes['u_space'][0] : shapes['u_space'][1]]
+        U = U.view(-1, con['U_channel'], con['U_height'], con['ast_embedding_size'])
+        print("U: ", U.shape)
+        X = image_batch[:, shapes['x_space'][0] : shapes['x_space'][1]]
+        X = X.view(-1, 1, con['X_height'], con['ast_embedding_size'])
+        print("X: ", X.shape)
+        u = relu(self.conv1_1_U(U))
+        u = relu(self.conv1_2_U(u))
+        u = self.max_pool_1_U(u)
+        u = relu(self.conv2_1_U(u))
+        u = relu(self.conv2_2_U(u))
+        u = self.max_pool_1_U(u)
+        u = relu(self.conv3_1_U(u))
+        u = relu(self.conv3_2_U(u))
+        u = self.max_pool_1_U(u)
+        print("u: ", u.shape)
+        x = relu(self.conv1_1_X(X))
+        x = relu(self.conv1_2_X(x))
+        x = self.max_pool_1_X(x)
+        x = relu(self.conv2_1_X(x))
+        x = relu(self.conv2_2_X(x))
+        x = self.max_pool_1_X(x)
+        x = relu(self.conv3_1_X(x))
+        x = relu(self.conv3_2_X(x))
+        x = self.max_pool_1_X(x)
+        print("x: ", x.shape)
+        u_out = u.view(-1, shapes['u_out_shape'])
+        x_out = x.view(-1, shapes['x_out_shape'])
+        return torch.cat([u_out, x_out], axis=1)

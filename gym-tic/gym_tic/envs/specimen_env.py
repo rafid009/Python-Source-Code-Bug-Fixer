@@ -4,12 +4,13 @@ from gym.utils import seeding
 import os
 import random as ran
 import numpy as np
+import torch.nn.functional as F
+import torch
 import copy
 # import Configure as con
 from configs.Configure import configuration as con
-from configs.Configure import state_tensors_key, state_key_tensors
 from configs.Configure import embedding_model
-from .specimen_parsers.array_maker import TensorRep
+from game.game import Action
 import copy
 from utils.utils import *
 import json
@@ -75,11 +76,6 @@ class SpecimenEnv(gym.Env):
             4 : [5],
             5 : []
         }
-        B = np.where(self.tensors['B'] > 0, 1, 0)
-        map_dict = {}
-        for node in range(B.shape[0]):
-            branches = np.nonzero(B[node])[0]
-            map_dict[node] = branches.tolist()
         return map_dict
 
     def reset(self):
@@ -98,26 +94,29 @@ class SpecimenEnv(gym.Env):
                 return ast_slice
 
             
-            specimen_path, failure_paths, state_paths = self._select_specimen()
+            specimen_path, failure_paths = self._select_specimen()
             json_list = to_string_list(json.loads(open(train_folder+specimen_path).read()))
             slices = processed_dict[specimen_path]['paths']
-            
-            tensors_ast = embedding_model.get_tensor_representaion(json_list)
-            
-            tensor_states = {}
+            tensors = {}
+            ast = embedding_model.get_tensor_representaion(json_list)
+            serial = ['0', '0-1', '0-1-3', '0-1-4', '0-1-3-5', '0-1-4-5', '0-2', '0-2-3', '0-2-4', '0-2-3-5', '0-2-4-5', 'ast']
+            tensor_states = {'ast': np.reshape(ast, (1, ast.shape[0], ast.shape[1]))}
             for key in slices.keys():
                     slice = get_ast_path(slices[key], json_list)
                     embed = embedding_model.get_tensor_representaion(slice)
-                    tensor_states[key] = embed
-                    state_tensors_key[embed] = key
-               
+                    tensor_states[key] = np.reshape(embed, (1, embed.shape[0], embed.shape[1]))
+                    embed = copy.deepcopy(embed)
+                    # state_key_tensors[key] = embed
+            sub_asts = []
+            for key in serial:
+                resized = F.adaptive_avg_pool2d(torch.from_numpy(tensor_states[key]), (con['U_height'], con['ast_embedding_size']))
+                sub_asts.append(resized)
+            tensors['U'] = torch.cat(sub_asts, axis=0).numpy()
+            tensors['X'] = sub_asts[0].numpy()
+            return specimen_path, failure_paths, tensors
 
-            state_key_tensors = tensor_states
 
-            return specimen_path, failure_paths, tensors_ast, tensor_states
-
-
-        self.specimen_path, self.failure_paths, self.tensors_ast, self.tensors_states = build_specimen()
+        self.specimen_path, self.failure_paths, self.tensors = build_specimen()
 
 
         # self.failure_state = self.get_failure_state(self.failure_path)
@@ -139,7 +138,7 @@ class SpecimenEnv(gym.Env):
             5 : []
         }
 
-        return np.array(map_dict[self.current_node], dtype=np.int32)[0]
+        return np.array(map_dict[self.current_node], dtype=np.int32)
 
     def seed(self, seed=1):
         self.np_random, seed = seeding.np_random(seed)
@@ -157,8 +156,7 @@ class SpecimenEnv(gym.Env):
 
 
     def get_state_array(self):
-
-        return (self.tensors_ast, self.tensors_states)
+        return np.concatenate(self.tensors['U'].flatten(), self.tensors['X'].flatten())
         
 
     def check_against_ground(self, actions_taken=[1], failure_paths=[[None]]):
@@ -188,36 +186,26 @@ class SpecimenEnv(gym.Env):
         return 0.0
 
 
-    def step(self, action):
+    def step(self, action: Action):
         if not self.done:
             self.branches_taken.append(action.index + 1)
             # Take slice of U to represent the current move.
-            
-            path_str = ''
-
-            for i in self.branches_taken:
-                path_str = path_str + str(i) + '-'
-            path_str = path_str[:-1]
-            
-            slice = copy.deepcopy(self.self.tensor_states[path_str])
-
+            action_index = get_index_from_action_history(self.branches_taken)
+            slice = copy.deepcopy(self.tensors['U'][action_index, :, :])
+            self.tensors['X'] = self.tensors['X'] + np.expand_dims(slice, 0)
             # Add the current move to the state involving all previous moves.
-            # self.tensors['X'] = self.tensors['X'] + np.expand_dims(slice, 2)
 
             state_array = self.get_state_array()
             self.counter += 1
 
         # If There are no nodes reachable by the current node, we have reached the end of the specimen program.
-        condition_tensor = np.where(self.tensors['B'] == 1, 1, 0)
-        if action.index ==  4:
+        if (action.index + 1) ==  5:
             self.done = True
 
         # Actions are zero indexed while nodes are 1 indexed.
         self.current_node = action.index + 1
 
         reward = self.check_against_ground(actions_taken=self.branches_taken, failure_paths=self.failure_paths)
-
-        # self.array_builder.render(self.tensors['U'][:, :, 0, :])
 
         return state_array, reward, self.done, {}
 
@@ -231,7 +219,6 @@ class SpecimenEnv(gym.Env):
 
         raw_file = os.path.join(self.file_path, self.specimens[spec_name]['ast'])
         answer_file = os.path.join(self.file_path, self.specimens[spec_name]['answer'])
-        state_file = os.path.join(self.file_path, self.specimens[spec_name]['answer'])
         if os.path.exists(raw_file) and self.specimens[spec_name]['answer'] != '':
             with open(answer_file, 'r') as f:
                 answers = f.read()
@@ -241,34 +228,11 @@ class SpecimenEnv(gym.Env):
             for answer in answers.split("\n"):
                 answer = answer.replace("[",'').replace("]",'')
                 if len(answer) > 0:
-                    failure_path = np.array([a.strip() for a in answer.split(",")]).astype(np.int32)
+                    failure_path = np.array([int(a.strip()) for a in answer.split(",")]).astype(np.int32)
                     failure_paths.append(failure_path)
-            return raw_file, failure_paths, state_file
+            return raw_file, failure_paths
         else:
             return self._select_specimen()
-
-    def reset(self):
-        """
-        Resets the board to start a new game
-        """
-        def build_specimen():
-            specimen_path, failure_paths = self._select_specimen()
-            array_builder = TensorRep(specimen_path, print_tokens=con['print_tokens'])
-            tensors = array_builder.make_tensor()
-            if tensors == None:
-                return build_specimen()
-            return specimen_path, failure_paths, array_builder, tensors
-
-        self.specimen_path, self.failure_paths, self.array_builder, self.tensors = build_specimen()
-
-
-        # self.failure_state = self.get_failure_state(self.failure_path)
-
-        self.counter = 0
-        self.done = False
-        self.branches_taken = []
-
-        return self.get_state_array()
 
     def render(self, mode='text', initial_node=False):
         """
@@ -283,18 +247,8 @@ class SpecimenEnv(gym.Env):
             # print(self.branches_taken)
             # print("Correct actions:")
             # print(self.failure_path)
-
-            if initial_node = True:
-                return (self.tensors_ast, self.tensors_states['0'])
             
-            path_str = ''
-
-            for i in self.branches_taken:
-                path_str = path_str + str(i) + '-'
-            path_str = path_str[:-1]
-            
-            return (self.tensors_ast, self.tensors_states[path_str])
-
+            return self.tensors['X']
 
     def close(self):
         pass

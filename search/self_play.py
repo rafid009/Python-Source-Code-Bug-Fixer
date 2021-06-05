@@ -1,17 +1,15 @@
 """Self-Play module: where the games are played."""
-from tensorflow_core import convert_to_tensor
-from config import MuZeroConfig
+import torch
+from configs.config import MuZeroConfig
 from game.game import AbstractGame
-from networks.network import AbstractNetwork
-from networks.shared_storage import SharedStorage
+from models.models import AbstractNetwork
+from shared_storage.shared_storage import SharedStorage
 from search.mcts import run_mcts, select_action, expand_node, add_exploration_noise
-from .utils import Node
 from training.replay_buffer import ReplayBuffer
-from gym_tic.envs.specimen_parsers.Configure import configuration as con
+from configs.Configure import configuration as con
 import numpy as np
 import os
-from .visualizer import vis
-from .connectivityTest import check_connectivity
+from utils.utils import *
 from gevent.pool import Pool
 
 
@@ -40,18 +38,15 @@ class Thread:
 
             rewards = sum(game.rewards)
 
-            game.connectivity_mat = np.sign(np.sum(game.env.tensors['X'][:, :, 0] ** 2, -1))
-            game.graph_is_connected = check_connectivity(game.connectivity_mat)
-
-            vis.add_game(game)
+            # game.connectivity_mat = np.sign(np.sum(game.env.tensors['X'][:, :, 0] ** 2, -1))
+            # game.graph_is_connected = check_connectivity(game.connectivity_mat)
+            game.graph_is_connected = True
+            # vis.add_game(game)
 
             game_file = os.path.split(game.env.specimen_path)[1]
             self.returns.append(rewards)
-            self.game_sort.append((game_file,rewards, game.graph_is_connected))
+            self.game_sort.append((game_file, rewards, game.graph_is_connected))
             game.env.close()
-
-
-
 
     def run(self):
         for i in range(self.train_episodes):
@@ -85,13 +80,13 @@ def run_selfplay(config: MuZeroConfig, storage: SharedStorage, replay_buffer: Re
 def run_eval(config: MuZeroConfig, storage: SharedStorage, eval_episodes: int, render=False, plot=False, weight_path=None):
     """Evaluate MuZero without noise added to the prior of the root and without softmax action selection"""
     network = storage.latest_network()
-    vis.add_network(network, weight_path)
+    # vis.add_network(network, weight_path)
     T = Thread(network, config, None, render, eval_episodes, mode='eval')
     returns, game_sort = T.run()
 
     stats = _check_win_loss(returns)
-    if plot:
-        vis.make_plots()
+    # if plot:
+    #     vis.make_plots()
     return sum(returns) / eval_episodes, game_sort, (stats if eval_episodes else 0,0)
 
 
@@ -116,10 +111,9 @@ def play_game(config: MuZeroConfig, network: AbstractNetwork, train: bool = True
         # At the root of the search tree we use the representation function to
         # obtain a hidden state given the current observation.
         root = Node(0)
-
-        raw_current_observation = (np.expand_dims(game.make_image(-1)[0],0), np.expand_dims(game.make_image(-1)[0],0)) 
+        raw_current_observation = (np.expand_dims(game.make_image(-1)[0],0), np.expand_dims(game.make_image(-1)[1],0)) 
         # current_observation = network.pre_con_network.run(convert_to_tensor(raw_current_observation))
-        expand_node(root, game.to_play(), game.legal_actions(), network.initial_inference(raw_current_observation[0], raw_current_observation[1]))
+        expand_node(root, game.to_play(), game.legal_actions(), network.initial_inference(raw_current_observation))
 
         if train:
             add_exploration_noise(config, root)
