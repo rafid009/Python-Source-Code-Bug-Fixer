@@ -22,7 +22,7 @@
     "spectral_weight_decay": 1E-4,
     "infinity":10E4,
 
-    "U_channels": 12,
+    "U_channel": 12,
     "U_height": 128,
     "X_channel": 1,
     "X_height": 128,

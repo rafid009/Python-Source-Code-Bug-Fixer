@@ -32,12 +32,10 @@ shapes['observation_size'] = shapes['u_in_shape'] + shapes['x_in_shape']
 shapes['output_size'] = shapes['u_out_shape'] + shapes['x_out_shape']
 
 
-configuration['raw_file_path'] = configuration['raw_file_path_Arren']
+# configuration['raw_file_path'] = configuration['raw_file_path_Arren']
 configuration['specimen_test_path'] = configuration['eval_ast_path']
 configuration['specimen_train_path'] = configuration['train_ast_path']
 configuration['specimen_eval_path'] = configuration['eval_ast_path']
 
-configuration['save_path'] = configuration['save_path_Arren']
-configuration['load_path'] = configuration['load_path_Arren']
 
 embedding_model = Ast2Vec('./code2vec.model')
