@@ -20,8 +20,7 @@ class SpecimenEnv(gym.Env):
     def __init__(self, file_path=None, render_this=False):
         # Get a dictionary with specimen[name] = {raw_program:raw_path, answer_key:answer_path}
         self.file_path = file_path
-        self.specimens = self._get_specimens(file_path)
-
+        self.specimens = self._get_specimens(file_path[0], file_path[1], file_path[2])
         self.render_this = render_this
         # Set State spaces
         self.action_space = spaces.Discrete(con['conditions'])
@@ -42,6 +41,7 @@ class SpecimenEnv(gym.Env):
         files = os.listdir(file_path_ast)
         for file in files:
             name = file.split(".json")[0]
+            # print('file: ',file,'\nname: ',name)
             if name not in specimens.keys() and (".json" in file):
                 specimens[name] = {"ast": ""}
             if ".json" in file:
@@ -56,13 +56,10 @@ class SpecimenEnv(gym.Env):
             if "_answers" in file:
                 specimens[name]['answer'] = file
 
-        files = os.listdir(file_path_states)
-        for key, file in files:
-            name = key.split("_answers")[0].split(".json")[0]
-            if name not in specimens.keys() and (".json" in file):
-                specimens[name]['states'] = ''
-            if ".json" in file:
-                specimens[name]['states'] = files[key]
+        files = json.loads(open(file_path_states).read())
+        for key in files.keys():
+            name = key.split(".json")[0]
+            specimens[name]['paths'] = files[key]['paths']
             
         return specimens
 
@@ -83,9 +80,9 @@ class SpecimenEnv(gym.Env):
         Resets the board to start a new game
         """
         def build_specimen():
-            train_folder = './data/train-asts/'
-            processed = './processed/train-processed.json'
-            processed_dict = json.loads(open(processed).read())
+            train_folder = self.file_path[0] #'./data/train-asts/'
+            processed = self.file_path[2] #'./processed/train-processed.json'
+            # processed_dict = json.loads(open(processed).read())
 
             def get_ast_path(node_list, ast):
                 ast_slice = []
@@ -95,8 +92,10 @@ class SpecimenEnv(gym.Env):
 
             
             specimen_path, failure_paths = self._select_specimen()
-            json_list = to_string_list(json.loads(open(train_folder+specimen_path).read()))
-            slices = processed_dict[specimen_path]['paths']
+            json_list = to_string_list(json.loads(open(specimen_path).read()))
+            # print(processed_dict.keys())
+            specimen_name = specimen_path.split('/')[-1].split('.json')[0]
+            slices = self.specimens[specimen_name]['paths']
             tensors = {}
             ast = embedding_model.get_tensor_representaion(json_list)
             serial = ['0', '0-1', '0-1-3', '0-1-4', '0-1-3-5', '0-1-4-5', '0-2', '0-2-3', '0-2-4', '0-2-3-5', '0-2-4-5', 'ast']
@@ -105,14 +104,16 @@ class SpecimenEnv(gym.Env):
                     slice = get_ast_path(slices[key], json_list)
                     embed = embedding_model.get_tensor_representaion(slice)
                     tensor_states[key] = np.reshape(embed, (1, embed.shape[0], embed.shape[1]))
-                    embed = copy.deepcopy(embed)
                     # state_key_tensors[key] = embed
             sub_asts = []
             for key in serial:
+                print('tensor states key: ', type(tensor_states[key]), tensor_states[key].shape)
                 resized = F.adaptive_avg_pool2d(torch.from_numpy(tensor_states[key]), (con['U_height'], con['ast_embedding_size']))
                 sub_asts.append(resized)
             tensors['U'] = torch.cat(sub_asts, axis=0).numpy()
+            print('in game: U: ', tensors['U'].shape)
             tensors['X'] = sub_asts[0].numpy()
+            print('in game: X: ', tensors['X'].shape)
             return specimen_path, failure_paths, tensors
 
 
@@ -145,18 +146,18 @@ class SpecimenEnv(gym.Env):
         return [seed]
 
     def get_failure_state(self, failure_path):
-        path_str = ''
+        path_str = '0'
 
         for i in failure_path:
-            path_str = path_str + str(i) + '-'
-        path_str = path_str[:-1]
+            path_str = path_str +  '-' + str(i)
 
-        return self.tensor_states[path_str]
+        return np.expand_dims(self.tensors['U'][get_index_from_action_path(path_str), :, :], 0)
         
 
 
     def get_state_array(self):
-        return np.concatenate(self.tensors['U'].flatten(), self.tensors['X'].flatten())
+        print('u_flat: ', self.tensors['U'].flatten().shape)
+        return np.concatenate((self.tensors['U'].flatten(), self.tensors['X'].flatten()))
         
 
     def check_against_ground(self, actions_taken=[1], failure_paths=[[None]]):
@@ -217,8 +218,9 @@ class SpecimenEnv(gym.Env):
         # spec_name = 'spec5994'
         # print(spec_name)
 
-        raw_file = os.path.join(self.file_path, self.specimens[spec_name]['ast'])
-        answer_file = os.path.join(self.file_path, self.specimens[spec_name]['answer'])
+        raw_file = os.path.join(self.file_path[0], self.specimens[spec_name]['ast'])
+        print('raw_file: ', raw_file)
+        answer_file = os.path.join(self.file_path[1], self.specimens[spec_name]['answer'])
         if os.path.exists(raw_file) and self.specimens[spec_name]['answer'] != '':
             with open(answer_file, 'r') as f:
                 answers = f.read()

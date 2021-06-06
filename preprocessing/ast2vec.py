@@ -1,5 +1,5 @@
 from gensim import models
-import torch
+import numpy as np
 
 class Ast2Vec(object):
     def __init__(self, model_file) -> None:
@@ -10,7 +10,7 @@ class Ast2Vec(object):
         nodes_list = []
         for node in ast:
             nodes_list.append(self.model.wv[node])
-        return torch.Tensor(nodes_list)
+        return np.asarray(nodes_list)
 
 
 

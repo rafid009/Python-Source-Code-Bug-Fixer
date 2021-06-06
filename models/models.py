@@ -22,6 +22,7 @@ class NetworkOutput(typing.NamedTuple):
 class AbstractNetwork(ABC, torch.nn.Module):
 
     def __init__(self):
+        super(AbstractNetwork, self).__init__()
         self.training_steps = 0
 
     @abstractmethod
@@ -47,7 +48,7 @@ class UniformNetwork(AbstractNetwork):
         return NetworkOutput(0,0, {Action(i): 1 / self.action_size for i in range(self.action_size)}, None)
 
 
-class InitialModel(torch.nn.Module):
+class InitialModel(nn.Module):
     """Model that combine the representation and prediction (value+policy) network."""
 
     def __init__(self, value_network: nn.Module, policy_network: nn.Module, representation_network: nn.Module):
@@ -63,7 +64,7 @@ class InitialModel(torch.nn.Module):
         return value, policy_logits
 
 
-class RecurrentModel(torch.nn.Module):
+class RecurrentModel(nn.Module):
     """Model that combine the dynamic, reward and prediction (value+policy) network."""
 
     def __init__(self,value_network: nn.Module, reward_network: nn.Module, policy_network: nn.Module, representation_network: nn.Module):
@@ -86,9 +87,22 @@ class RecurrentModel(torch.nn.Module):
 class BaseNetwork(AbstractNetwork):
     """Base class that contains all the networks and models of MuZero."""
 
-    def __init__(self, value_network: nn.Module, reward_network: nn.Module, policy_network: nn.Module, representation_network=None, load_path: str=None):
+    def __init__(self, load_path: str=None):
         super().__init__()
         # Networks blocks
+        self.value_network = None
+        self.reward_network = None
+        self.policy_network = None
+        self.representation_network = None
+        # Models for inference and training
+        self.initial_model = None#InitialModel(self.value_network, self.policy_network, self.representation_network).cuda()
+        self.recurrent_model = None#RecurrentModel(self.value_network, self.reward_network, self.policy_network, self.representation_network).cuda()
+
+    def set_networks(self, value_network: nn.Module, reward_network: nn.Module, policy_network: nn.Module, representation_network: nn.Module=None):
+        print('value: ',self.value_network)
+        print('reward: ',self.reward_network)
+        print('policy: ',self.policy_network)
+        print('rep: ',self.representation_network)
         self.value_network = value_network
         self.reward_network = reward_network
         self.policy_network = policy_network
@@ -137,7 +151,9 @@ class BaseNetwork(AbstractNetwork):
 
     def cb_get_variables(self):
         """Returns a list of trainable variables of the network."""
-        networks = (self.value_network, self.policy_network, self.reward_network, self.representation_network)
+        networks = (self.value_network, self.reward_network, self.policy_network, self.representation_network)
+        for n in networks:
+            print(n)
         return [variables
                 for variables_list in map(lambda n: n.parameters(), networks)
                 for variables in variables_list]

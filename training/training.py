@@ -1,5 +1,6 @@
 """Training module: this is where MuZero neurons are trained."""
 
+from models.default_network import DefaultNetwork
 from typing import Dict
 import numpy as np
 import torch
@@ -32,7 +33,7 @@ def train_network(config: MuZeroConfig, storage: SharedStorage, replay_buffer: R
 
 
 
-def update_weights(optimizer_info: Dict, network: BaseNetwork, batch):
+def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
 
     def scale_gradient(tensor, scale: float):
         """Trick function to scale the gradient in tensorflow"""

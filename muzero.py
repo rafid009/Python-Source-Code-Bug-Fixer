@@ -67,12 +67,12 @@ def play_test(network):
 def get_weight_path():
     weight_path = con['save_path']
     if not os.path.exists(weight_path):
-        os.mkdir(weight_path)
+        os.makedirs(weight_path)
     models = [item for item in os.listdir(weight_path) if 'model' in item]
 
     next_model = "model "+str(len(models))
     weight_path = os.path.join(weight_path, next_model)
-    os.mkdir(weight_path)
+    os.makedirs(weight_path)
     return weight_path
 
 def save_model_stats(weight_path, stats):

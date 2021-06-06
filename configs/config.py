@@ -130,7 +130,7 @@ def make_config() -> MuZeroConfig:
         lr=con['lr'],
         pb_init=con['pb_c_init'],
         oponent=None,
-        specimen_path=con['specimen_train_path'])
+        specimen_path=(con['specimen_train_path'], con['train_answers_path'], con['train_ast_states']))
 
 def playtest_config() -> MuZeroConfig:
     def visit_softmax_temperature(num_moves, training_steps):
@@ -155,5 +155,5 @@ def playtest_config() -> MuZeroConfig:
         lr=con['lr'],
         pb_init=con['pb_c_init_eval'],
         oponent=None,
-        specimen_path=con['specimen_eval_path'])
+        specimen_path=(con['specimen_eval_path'], con['eval_answers_path'], con['eval_ast_states']))
 

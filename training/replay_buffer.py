@@ -50,7 +50,8 @@ class ReplayBuffer(object):
 
     def sample_games(self) -> List[AbstractGame]:
         # Sample game from buffer either uniformly or according to some priority.
-        return random.choices(self.buffer, k=self.batch_size)
+        k = min(len(self.buffer), self.batch_size)
+        return random.choices(self.buffer, k=k)
 
     def sample_position(self, game: AbstractGame) -> int:
         # Sample position from game either uniformly or according to some priority.

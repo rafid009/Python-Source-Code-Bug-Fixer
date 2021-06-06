@@ -37,27 +37,23 @@ def relu(x):
 class DefaultNetwork(BaseNetwork):
 
     def __init__(self,
-                 weight_decay: float = 1e-4,
                  action_size: int = 0,
-                 state_size: int = 0,
                  load_path: str = None):
-
+        super().__init__(load_path=load_path)
         # regularizer = regularizers.l2(weight_decay)
         if con['continue_training']:
             load_path = con['load_path']
         
-        self.policy_network = None
-        self.value_network = None
-        self.reward_network = None 
-        self.representation_network = None
+        # self.policy_network = None
+        # self.value_network = None
+        # self.reward_network = None 
+        # self.representation_network = None
         self.meta_data = None
         if load_path:
             self.policy_network, self.value_network, self.reward_network, self.representation_network, self.meta_data = self.load_networks(load_path)
             self.action_size = self.meta_data['action_size']
         else:
             self.action_size = action_size
-
-            self.representation_network = RepresentationNetwork().cuda()
             
             input_features = shapes['output_size']
             
@@ -73,12 +69,13 @@ class DefaultNetwork(BaseNetwork):
                 nn.Linear(con['hidden_reward'], 1)
             ).cuda()
             
-            self.reward_network = nn.Sequential(
+            self.policy_network = nn.Sequential(
                 nn.Linear(input_features, con['hidden_policy']),
                 nn.SELU(),
                 nn.Linear(con['hidden_policy'], action_size)
             ).cuda()
             
+            self.representation_network = RepresentationNetwork().cuda()
             # value_network = torch.nn.Sequential([Dense(con['hidden_value'], activation='selu', kernel_regularizer=regularizer,
             #                                   kernel_initializer='lecun_normal', bias_initializer="lecun_normal",
             #                                   input_dim=shapes['output_size']),
@@ -95,9 +92,7 @@ class DefaultNetwork(BaseNetwork):
             #                                    input_dim=shapes['output_size']),
             #                              Dense(action_size, kernel_regularizer=regularizer,
             #                                    input_dim=con['hidden_policy'])])
-
-
-        super().__init__(self.value_network, self.reward_network, self.policy_network, self.representation_network, load_path=load_path)
+        BaseNetwork.set_networks(self, self.value_network, self.reward_network, self.policy_network, self.representation_network)
 
     def load_networks(self, file_path='./saved-models'):
         self.policy_network = torch.load(os.path.join(file_path, 'policy_network.pth'))
@@ -152,9 +147,9 @@ class DefaultNetwork(BaseNetwork):
         return values_exp / np.sum(values_exp)
 
 
-class RepresentationNetwork(torch.nn.Module):
+class RepresentationNetwork(nn.Module):
     def __init__(self):
-        super().__init__()
+        super(RepresentationNetwork, self).__init__()
         # for U
         self.conv1_1_U = conv3x3(12, 32)
         self.conv1_2_U = conv3x3(32, 64)

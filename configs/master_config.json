@@ -1,15 +1,17 @@
 {
-    "continue_training":true,
-    "print_tokens": false,
+    "continue_training":false,
+    "print_tokens": true,
     "random_agent": true,
 
     "train_ast_path": "./data/train-asts",
+    "train_answers_path": "./data/train",
     "train_ast_states": "./processed/train-processed.json",
     "eval_ast_path": "./data/eval-asts",
+    "eval_answers_path": "./data/eval",
     "eval_ast_states": "./processed/eval-processed.json",
 
     "save_path":"../storage/ARP1",
-    "load_path": "../storage/ARP1/Model 0",
+    "load_path_r": "../storage/ARP1/Model 0",
     "record_every": 10,
     "loops":1,
     "epochs":2,

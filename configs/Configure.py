@@ -38,4 +38,5 @@ configuration['specimen_train_path'] = configuration['train_ast_path']
 configuration['specimen_eval_path'] = configuration['eval_ast_path']
 
 
+
 embedding_model = Ast2Vec('./code2vec.model')
