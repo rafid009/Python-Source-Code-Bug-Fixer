@@ -138,7 +138,7 @@ class DefaultNetwork(BaseNetwork):
         return sigmoid[0][0]
     
     def _conditioned_hidden_state(self, hidden_state, action: Action) -> np.array:
-        conditioned_hidden = np.concatenate((hidden_state[1], np.eye(self.action_size)[action.index]))
+        conditioned_hidden = np.concatenate((hidden_state, np.eye(self.action_size)[action.index]))
         return np.expand_dims(conditioned_hidden, axis=0)
 
     def _softmax(self, values):
@@ -186,6 +186,8 @@ class RepresentationNetwork(nn.Module):
 
     def forward(self, image_batch):
         # ouptut size = 256 * 16 * 16 for both
+        if type(image_batch) != torch.Tensor:
+            image_batch = torch.Tensor(image_batch).cuda()
         U = image_batch[:, shapes['u_space'][0] : shapes['u_space'][1]]
         U = U.view(-1, con['U_channel'], con['U_height'], con['ast_embedding_size'])
         X = image_batch[:, shapes['x_space'][0] : shapes['x_space'][1]]

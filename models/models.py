@@ -58,7 +58,9 @@ class InitialModel(nn.Module):
         self.representation_network = representation_network
 
     def forward(self, image):
-        convolved_image = self.representation_network(image)
+        if type(image) != torch.Tensor:
+            image = torch.Tensor(image)
+        convolved_image = self.representation_network(image.cuda())
         value = self.value_network(convolved_image)
         policy_logits = self.policy_network(convolved_image)
         return value, policy_logits
@@ -75,7 +77,9 @@ class RecurrentModel(nn.Module):
         self.representation_network = representation_network
 
     def forward(self, image):
-        convolved_image = self.representation_network(image)
+        if type(image) != torch.Tensor:
+            image = torch.Tensor(image)
+        convolved_image = self.representation_network(image.cuda())
         value = self.value_network(convolved_image)
         start, end = shapes['x_out_space']
         X = convolved_image[:, start : end]
@@ -99,10 +103,10 @@ class BaseNetwork(AbstractNetwork):
         self.recurrent_model = None#RecurrentModel(self.value_network, self.reward_network, self.policy_network, self.representation_network).cuda()
 
     def set_networks(self, value_network: nn.Module, reward_network: nn.Module, policy_network: nn.Module, representation_network: nn.Module=None):
-        print('value: ',self.value_network)
-        print('reward: ',self.reward_network)
-        print('policy: ',self.policy_network)
-        print('rep: ',self.representation_network)
+        # print('value: ',self.value_network)
+        # print('reward: ',self.reward_network)
+        # print('policy: ',self.policy_network)
+        # print('rep: ',self.representation_network)
         self.value_network = value_network
         self.reward_network = reward_network
         self.policy_network = policy_network
@@ -120,7 +124,7 @@ class BaseNetwork(AbstractNetwork):
 
     def initial_inference(self, image) -> NetworkOutput:
         """representation + prediction function"""
-        value, policy_logits = self.initial_model(image)
+        value, policy_logits = self.initial_model(image.cuda())
         output = NetworkOutput(value=self._value_transform(value),
                                reward=0,
                                policy_logits=NetworkOutput.build_policy_logits(policy_logits),
@@ -130,7 +134,7 @@ class BaseNetwork(AbstractNetwork):
     def recurrent_inference(self, input_state, actions) -> NetworkOutput:
         """dynamics + prediction function"""
         new_state = simulate(input_state, actions)
-        value, reward, policy_logits = self.recurrent_model(new_state)
+        value, reward, policy_logits = self.recurrent_model(new_state.cuda())
         output = NetworkOutput(value=self._value_transform(value),
                                reward=reward,
                                policy_logits=NetworkOutput.build_policy_logits(policy_logits),
@@ -152,8 +156,6 @@ class BaseNetwork(AbstractNetwork):
     def cb_get_variables(self):
         """Returns a list of trainable variables of the network."""
         networks = (self.value_network, self.reward_network, self.policy_network, self.representation_network)
-        for n in networks:
-            print(n)
         return [variables
                 for variables_list in map(lambda n: n.parameters(), networks)
                 for variables in variables_list]
