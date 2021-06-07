@@ -107,13 +107,13 @@ class SpecimenEnv(gym.Env):
                     # state_key_tensors[key] = embed
             sub_asts = []
             for key in serial:
-                print('tensor states key: ', type(tensor_states[key]), tensor_states[key].shape)
+                # print('tensor states key: ', type(tensor_states[key]), tensor_states[key].shape)
                 resized = F.adaptive_avg_pool2d(torch.from_numpy(tensor_states[key]), (con['U_height'], con['ast_embedding_size']))
                 sub_asts.append(resized)
             tensors['U'] = torch.cat(sub_asts, axis=0).numpy()
-            print('in game: U: ', tensors['U'].shape)
+            # print('in game: U: ', tensors['U'].shape)
             tensors['X'] = sub_asts[0].numpy()
-            print('in game: X: ', tensors['X'].shape)
+            # print('in game: X: ', tensors['X'].shape)
             return specimen_path, failure_paths, tensors
 
 
@@ -156,7 +156,6 @@ class SpecimenEnv(gym.Env):
 
 
     def get_state_array(self):
-        print('u_flat: ', self.tensors['U'].flatten().shape)
         return np.concatenate((self.tensors['U'].flatten(), self.tensors['X'].flatten()))
         
 
@@ -219,7 +218,7 @@ class SpecimenEnv(gym.Env):
         # print(spec_name)
 
         raw_file = os.path.join(self.file_path[0], self.specimens[spec_name]['ast'])
-        print('raw_file: ', raw_file)
+        # print('raw_file: ', raw_file)
         answer_file = os.path.join(self.file_path[1], self.specimens[spec_name]['answer'])
         if os.path.exists(raw_file) and self.specimens[spec_name]['answer'] != '':
             with open(answer_file, 'r') as f:

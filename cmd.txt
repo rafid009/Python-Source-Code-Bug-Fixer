@@ -1,0 +1,3 @@
+screen -dm bash -c 'script -c "python muzero.py" output.txt'
+
+screen -dm bash -c 'script -c "CUDA_VISIBLE_DEVICES=1 python muzero.py" output.txt'

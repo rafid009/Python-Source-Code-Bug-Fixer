@@ -111,7 +111,7 @@ def play_game(config: MuZeroConfig, network: AbstractNetwork, train: bool = True
         # At the root of the search tree we use the representation function to
         # obtain a hidden state given the current observation.
         root = Node(0)
-        raw_current_observation = (np.expand_dims(game.make_image(-1)[0],0), np.expand_dims(game.make_image(-1)[1],0)) 
+        raw_current_observation = np.expand_dims(game.make_image(-1),0) 
         # current_observation = network.pre_con_network.run(convert_to_tensor(raw_current_observation))
         expand_node(root, game.to_play(), game.legal_actions(), network.initial_inference(raw_current_observation))
 

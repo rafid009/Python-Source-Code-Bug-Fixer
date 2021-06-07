@@ -166,7 +166,7 @@ class RepresentationNetwork(nn.Module):
         self.max_pool_3_U = nn.MaxPool2d(2)
         
         # for X
-        self.conv1_1_X = conv3x3(12, 32)
+        self.conv1_1_X = conv3x3(1, 32)
         self.conv1_2_X = conv3x3(32, 64)
         self.max_pool_1_X = nn.MaxPool2d(2)
         
@@ -188,10 +188,8 @@ class RepresentationNetwork(nn.Module):
         # ouptut size = 256 * 16 * 16 for both
         U = image_batch[:, shapes['u_space'][0] : shapes['u_space'][1]]
         U = U.view(-1, con['U_channel'], con['U_height'], con['ast_embedding_size'])
-        print("U: ", U.shape)
         X = image_batch[:, shapes['x_space'][0] : shapes['x_space'][1]]
         X = X.view(-1, 1, con['X_height'], con['ast_embedding_size'])
-        print("X: ", X.shape)
         u = relu(self.conv1_1_U(U))
         u = relu(self.conv1_2_U(u))
         u = self.max_pool_1_U(u)
@@ -201,7 +199,6 @@ class RepresentationNetwork(nn.Module):
         u = relu(self.conv3_1_U(u))
         u = relu(self.conv3_2_U(u))
         u = self.max_pool_1_U(u)
-        print("u: ", u.shape)
         x = relu(self.conv1_1_X(X))
         x = relu(self.conv1_2_X(x))
         x = self.max_pool_1_X(x)
@@ -211,7 +208,6 @@ class RepresentationNetwork(nn.Module):
         x = relu(self.conv3_1_X(x))
         x = relu(self.conv3_2_X(x))
         x = self.max_pool_1_X(x)
-        print("x: ", x.shape)
         u_out = u.view(-1, shapes['u_out_shape'])
         x_out = x.view(-1, shapes['x_out_shape'])
         return torch.cat([u_out, x_out], axis=1)

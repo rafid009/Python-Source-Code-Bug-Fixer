@@ -18,6 +18,7 @@ def simulate(image, actions):
     X = X.view(X_shape)
     next_state = 0
     if type(actions[0]) == int:
+        print('actions: ', actions)
         path_str = '0'
         path_str += '-' + '-'.join(np.array(actions).astype(str))
         next_state = U[:, get_index_from_action_path(path_str), :, :]
@@ -25,8 +26,9 @@ def simulate(image, actions):
         slices =  []
         path_str = '0'
         i = 0
+        print('actions batch: ', actions)
         for acts in actions:
-            path_str += '-' + '-'.join(np.array(actions).astype(str))
+            path_str += '-' + '-'.join((np.array(acts) + 1).astype(str))
             next_slice = U[i, get_index_from_action_path(path_str), :, :]
             slices.append(next_slice)
             i += 1

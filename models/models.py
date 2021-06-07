@@ -120,7 +120,7 @@ class BaseNetwork(AbstractNetwork):
 
     def initial_inference(self, image) -> NetworkOutput:
         """representation + prediction function"""
-        value, policy_logits = self.initial_model(image[0], image[1])
+        value, policy_logits = self.initial_model(image)
         output = NetworkOutput(value=self._value_transform(value),
                                reward=0,
                                policy_logits=NetworkOutput.build_policy_logits(policy_logits),

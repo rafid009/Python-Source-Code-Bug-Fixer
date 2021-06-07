@@ -9,12 +9,14 @@ import pickle
 import json
 from configs.Configure import configuration as con
 import logging
+import torch
 
+torch.cuda.device(torch.device('cuda:1'))
 def save_all_networks(storage, save_path):
     default_network = storage.latest_network()
     default_network.save_networks(save_path)
     with open(os.path.join(save_path, 'optimizer.pkl'), 'wb') as g:
-        pickle.dump(storage.optimizer, g)
+        pickle.dump(storage.optimizer_info, g)
 
 
 def muzero(config: MuZeroConfig, test_config: MuZeroConfig, save_path, load=False):
