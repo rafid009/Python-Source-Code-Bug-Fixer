@@ -5,11 +5,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.modules import conv
+from torch.nn.modules.activation import Sigmoid
 
 from models.models import BaseNetwork
 from game.game import Action
 import os
 import json
+import copy
 import pickle
 
 # from networks.spectral import eigen, laplacean
@@ -60,19 +62,22 @@ class DefaultNetwork(BaseNetwork):
             self.value_network = nn.Sequential(
                 nn.Linear(input_features, con['hidden_value']),
                 nn.SELU(),
-                nn.Linear(con['hidden_value'], 3)
+                nn.Linear(con['hidden_value'], 3),
+                nn.Sigmoid()
             ).cuda()
             
             self.reward_network = nn.Sequential(
                 nn.Linear(shapes['x_out_shape'], con['hidden_reward']),
                 nn.SELU(),
-                nn.Linear(con['hidden_reward'], 1)
+                nn.Linear(con['hidden_reward'], 1),
+                nn.Sigmoid()
             ).cuda()
             
             self.policy_network = nn.Sequential(
                 nn.Linear(input_features, con['hidden_policy']),
                 nn.SELU(),
-                nn.Linear(con['hidden_policy'], action_size)
+                nn.Linear(con['hidden_policy'], action_size),
+                nn.Softmax(1)
             ).cuda()
             
             self.representation_network = RepresentationNetwork().cuda()
@@ -119,30 +124,38 @@ class DefaultNetwork(BaseNetwork):
             json.dump(self.meta_data,g)
         print("Saved model")
 
-    def _value_transform(self, value_support: np.array) -> float:
+    def _value_transform(self, value_support) -> float:
         """
         The value is obtained by first computing the expected value from the discrete support.
         Second, the inverse transform is then apply (the square function).
         """
-
+        value_support = value_support.clone().cpu()
+        value_support = value_support.detach().numpy()
         support = np.array([-1,0,1])
+        # print('v support:',value_support)
         value = self._softmax(value_support)
         value = np.dot(value, support)
         return value
 
-    def _reward_transform(self, reward: np.array) -> float:
+    def _reward_transform(self, reward) -> float:
         """
         Stable sigmoid function in numpy
         """
+        reward = reward.clone().cpu()
+        reward = reward.detach().numpy()
         sigmoid =  np.piecewise(reward, [reward >= 0, reward<0], [lambda x: 1 / (1 + np.exp(-x)), lambda x: np.exp(x) / (1 + np.exp(x))])
         return sigmoid[0][0]
     
     def _conditioned_hidden_state(self, hidden_state, action: Action) -> np.array:
+        hidden_state = hidden_state.clone().cpu()
+        hidden_state = hidden_state.detach().numpy()
         conditioned_hidden = np.concatenate((hidden_state, np.eye(self.action_size)[action.index]))
         return np.expand_dims(conditioned_hidden, axis=0)
 
     def _softmax(self, values):
         """Compute softmax using numerical stability tricks."""
+        # values = values.clone().cpu()
+        # values = values.detach().numpy()
         values_exp = np.exp(values - np.max(values))
         return values_exp / np.sum(values_exp)
 

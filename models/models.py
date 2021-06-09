@@ -124,7 +124,7 @@ class BaseNetwork(AbstractNetwork):
 
     def initial_inference(self, image) -> NetworkOutput:
         """representation + prediction function"""
-        value, policy_logits = self.initial_model(image.cuda())
+        value, policy_logits = self.initial_model(image)
         output = NetworkOutput(value=self._value_transform(value),
                                reward=0,
                                policy_logits=NetworkOutput.build_policy_logits(policy_logits),
@@ -134,7 +134,7 @@ class BaseNetwork(AbstractNetwork):
     def recurrent_inference(self, input_state, actions) -> NetworkOutput:
         """dynamics + prediction function"""
         new_state = simulate(input_state, actions)
-        value, reward, policy_logits = self.recurrent_model(new_state.cuda())
+        value, reward, policy_logits = self.recurrent_model(new_state)
         output = NetworkOutput(value=self._value_transform(value),
                                reward=reward,
                                policy_logits=NetworkOutput.build_policy_logits(policy_logits),

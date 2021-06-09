@@ -204,7 +204,6 @@ class SpecimenEnv(gym.Env):
 
         # Actions are zero indexed while nodes are 1 indexed.
         self.current_node = action.index + 1
-
         reward = self.check_against_ground(actions_taken=self.branches_taken, failure_paths=self.failure_paths)
 
         return state_array, reward, self.done, {}

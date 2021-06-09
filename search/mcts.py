@@ -12,7 +12,7 @@ from models.models import NetworkOutput, BaseNetwork
 from utils.utils import MinMaxStats, Node, softmax_sample
 import numpy as np
 import random
-random.seed(1)
+random.seed(10)
 
 def add_exploration_noise(config: MuZeroConfig, node: Node):
     """

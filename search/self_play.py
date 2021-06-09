@@ -106,28 +106,28 @@ def play_game(config: MuZeroConfig, network: AbstractNetwork, train: bool = True
     else:
         mode_action_select = 'softmax' if train else 'max'
     # game.env.reset()
+    with torch.no_grad():
+        while not game.terminal() and len(game.history) < config.max_moves:
+            # At the root of the search tree we use the representation function to
+            # obtain a hidden state given the current observation.
+            root = Node(0)
+            raw_current_observation = np.expand_dims(game.make_image(-1),0) 
+            # current_observation = network.pre_con_network.run(convert_to_tensor(raw_current_observation))
+            expand_node(root, game.to_play(), game.legal_actions(), network.initial_inference(raw_current_observation))
 
-    while not game.terminal() and len(game.history) < config.max_moves:
-        # At the root of the search tree we use the representation function to
-        # obtain a hidden state given the current observation.
-        root = Node(0)
-        raw_current_observation = np.expand_dims(game.make_image(-1),0) 
-        # current_observation = network.pre_con_network.run(convert_to_tensor(raw_current_observation))
-        expand_node(root, game.to_play(), game.legal_actions(), network.initial_inference(raw_current_observation))
+            if train:
+                add_exploration_noise(config, root)
 
-        if train:
-            add_exploration_noise(config, root)
+            # We then run a Monte Carlo Tree Search using only action sequences and the
+            # model learned by the networks.
+            reachability = game.env.get_reachability_map()
+            run_mcts(config, root, game.action_history(), network, reachability)
+            action = select_action(config, len(game.history), root, network, mode=mode_action_select)
+            game.apply(action)
+            if render_this and game.done:
+                game.env.render()
 
-        # We then run a Monte Carlo Tree Search using only action sequences and the
-        # model learned by the networks.
-        reachability = game.env.get_reachability_map()
-        run_mcts(config, root, game.action_history(), network, reachability)
-        action = select_action(config, len(game.history), root, network, mode=mode_action_select)
-        game.apply(action)
-        if render_this and game.done:
-            game.env.render()
-
-        game.store_search_statistics(root)
+            game.store_search_statistics(root)
     return game
 
 

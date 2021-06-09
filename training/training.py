@@ -27,7 +27,9 @@ def train_network(config: MuZeroConfig, storage: SharedStorage, replay_buffer: R
         batch = replay_buffer.sample_batch(config.num_unroll_steps, config.td_steps)
         if i == 0:
             network.record_this = storage.record_this
+        print('before update weights')
         update_weights(optimizer_info, network, batch)
+        print('after update weights')
         storage.save_network(network.training_steps, network)
         storage.record_this = network.record_this
 
@@ -103,16 +105,21 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
         reward_loss = 0.0
         # Recurrent steps, from action and previous hidden state.
         i = -1
-        for actions_history_batch, targets_batch, mask, dynamic_mask in zip(actions_history, targets_time_batch,
+        print('before loss calc loop')
+        print(zip(targets_time_batch, mask_time_batch, dynamic_mask_time_batch))
+        print('sizes: ', len(targets_time_batch), '\n', mask_time_batch, dynamic_mask_time_batch)
+        actions_history_batch = actions_history
+        for targets_batch, mask, dynamic_mask in zip(targets_time_batch,
                                                                     mask_time_batch, dynamic_mask_time_batch):
+            print('inside loss calc loop')
             target_value_batch, target_reward_batch2, target_policy_batch = zip(*targets_batch)
             i +=1
-            print('dyn mask: ', torch.as_tensor(dynamic_mask).shape, '\nmask: ', torch.as_tensor(mask).shape, '\nbatch: ', len(image_batch))
+            # print('dyn mask: ', torch.as_tensor(dynamic_mask).shape, '\nmask: ', torch.as_tensor(mask).shape, '\nbatch: ', len(image_batch))
             # Only execute BPTT for elements with an action
-            print("dynamic: ", dynamic_mask)
-            print("img batch before: ", type(image_batch), torch.Tensor(image_batch).shape,'\n',image_batch)
+            # print("dynamic: ", dynamic_mask)
+            # print("img batch before: ", type(image_batch), torch.Tensor(image_batch).shape,'\n',image_batch)
             image_batch = torch.as_tensor(image_batch)[torch.as_tensor(dynamic_mask)==True, :] #torch.masked_select(image_batch, dynamic_mask)
-            print('img batch: ', image_batch.shape)
+            # print('img batch: ', image_batch.shape)
             target_reward_batch1 = target_reward_batch1[mask==True] #torch.masked_select(target_reward_batch1, mask)
 
             games1 = [games0[g] for g in range(len(games0)) if dynamic_mask[g]]
@@ -120,10 +127,12 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
             # Creating conditioned_representation: concatenate representations with actions batch
             # actions_batch = F.one_hot(actions_batch, network.action_size)
 
-            image1 = simulate(image_batch, actions_history_batch)
+            image1 = simulate(image_batch, actions_history_batch[0:len(image_batch)])
             # Recurrent step from conditioned representation: recurrent + prediction networks
             value_batch, reward_batch, policy_batch = network.recurrent_model(Variable(image1).cuda())
-
+            print('values: ', value_batch)
+            print('rewards: ',reward_batch)
+            print('policies: ', policy_batch)
             # Only execute BPTT for elements with a policy target
             target_policy_batch = [policy for policy, b in zip(target_policy_batch, mask) if b]
             mask_policy = list(map(lambda l: bool(l), target_policy_batch))
@@ -181,11 +190,14 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
         loss_string = "value: " + str(round(float(value_loss),3)) + " policy: " + str(round(float(policy_loss),3)) + \
               " reward: " + str(round(float(reward_loss),3))
         logging.info(loss_string)
+        print('after loss calc loop')
         print(loss_string)
         return loss
     optimizer = optim.Adam(network.cb_get_variables(), lr=optimizer_info['lr'])
     optimizer.zero_grad()
+    print('before loss function')
     loss = loss()
+    print('after loss function')
     loss.backward()
     optimizer.step()
     network.training_steps += 1

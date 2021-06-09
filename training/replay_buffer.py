@@ -29,14 +29,14 @@ class ReplayBuffer(object):
 
         # Pre-process the batch
         image_batch, actions_history, actions_time_batch, targets_batch, games = zip(*game_data)
-        print('image_batch: ', type(image_batch), type(image_batch[0]))
-        print('action hist: ', actions_history, '\naction time batch: ', actions_time_batch)
+        # print('image_batch: ', type(image_batch), type(image_batch[0]))
+        # print('action hist: ', actions_history, '\naction time batch: ', actions_time_batch)
 
         #targets_init_batch should be the initial value predicted for each element of the batch.
         targets_init_batch, *targets_time_batch = zip(*targets_batch)
         actions_time_batch = list(zip_longest(*actions_time_batch, fillvalue=None))
         temp_actions_history = list(zip_longest(*actions_history, fillvalue=None))
-        print('temp: ', temp_actions_history)
+        # print('temp: ', temp_actions_history)
         # Building batch of valid actions and a dynamic mask for hidden representations during BPTT
         mask_time_batch = []
         dynamic_mask_time_batch = []
@@ -48,10 +48,7 @@ class ReplayBuffer(object):
             dynamic_mask_time_batch.append(dynamic_mask)
             last_mask = mask
             actions_time_batch[i] = [action.index for action in actions_batch if action]
-
-        mask_time_batch = []
-        dynamic_mask_time_batch = []
-        last_mask = [True] * len(image_batch)
+            
         actions_history = []
         for actions_batch in temp_actions_history:
             for i in range(len(actions_batch)):
@@ -59,7 +56,7 @@ class ReplayBuffer(object):
                     actions_history.append([actions_batch[i].index + 1])
                 else:
                     actions_history[i].append(actions_batch[i].index + 1)
-        print("actions hist after: ", actions_history)
+        # print("actions hist after: ", actions_history)
         batch = image_batch, targets_init_batch, targets_time_batch, actions_history, actions_time_batch, mask_time_batch, dynamic_mask_time_batch, games
         return batch
 
