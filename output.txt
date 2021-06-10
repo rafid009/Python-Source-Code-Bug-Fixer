@@ -1,0 +1,917 @@
+Script started on Wed 09 Jun 2021 08:47:06 PM PDT
+Training loop 0
+value: 2.426 policy: 0.32 reward: 1.444
+value: 2.768 policy: 0.577 reward: 2.724
+value: 2.398 policy: 0.494 reward: 2.458
+value: 1.854 policy: 0.286 reward: 1.46
+Train score: 0.2
+Eval score: 0.0
+MuZero played 5 episodes and trained for 4 epochs.
+
+Training loop 1
+value: 1.7 policy: 0.179 reward: 1.407
+value: 2.391 policy: 0.474 reward: 2.088
+value: 2.51 policy: 0.418 reward: 2.08
+value: 1.733 policy: 0.168 reward: 1.386
+Train score: 0.2
+Eval score: 0.0
+MuZero played 10 episodes and trained for 8 epochs.
+
+Training loop 2
+value: 2.393 policy: 0.408 reward: 2.079
+value: 2.382 policy: 0.425 reward: 2.079
+value: 2.365 policy: 0.447 reward: 2.079
+value: 2.388 policy: 0.397 reward: 2.079
+Train score: 0.2
+Eval score: 1.0
+MuZero played 15 episodes and trained for 12 epochs.
+
+Training loop 3
+value: 2.408 policy: 0.397 reward: 2.079
+value: 2.35 policy: 0.417 reward: 2.079
+value: 2.421 policy: 0.472 reward: 2.079
+value: 2.496 policy: 0.344 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 20 episodes and trained for 16 epochs.
+
+Training loop 4
+value: 2.395 policy: 0.446 reward: 2.079
+value: 2.434 policy: 0.427 reward: 2.079
+value: 2.572 policy: 0.417 reward: 2.079
+value: 2.656 policy: 0.424 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 25 episodes and trained for 20 epochs.
+
+Training loop 5
+value: 2.521 policy: 0.487 reward: 2.079
+value: 2.464 policy: 0.416 reward: 2.079
+value: 2.416 policy: 0.392 reward: 2.079
+value: 2.347 policy: 0.443 reward: 2.079
+Train score: 0.0
+Eval score: 0.0
+MuZero played 30 episodes and trained for 24 epochs.
+
+Training loop 6
+value: 2.311 policy: 0.479 reward: 2.079
+value: 2.487 policy: 0.422 reward: 2.079
+value: 2.345 policy: 0.469 reward: 2.079
+value: 2.324 policy: 0.403 reward: 2.079
+Train score: 0.0
+Eval score: 1.0
+MuZero played 35 episodes and trained for 28 epochs.
+
+Training loop 7
+value: 2.388 policy: 0.498 reward: 2.079
+value: 2.306 policy: 0.421 reward: 2.079
+value: 2.424 policy: 0.438 reward: 2.079
+value: 2.41 policy: 0.416 reward: 2.079
+Train score: 0.0
+Eval score: 0.0
+MuZero played 40 episodes and trained for 32 epochs.
+
+Training loop 8
+value: 2.597 policy: 0.473 reward: 2.079
+value: 2.448 policy: 0.45 reward: 2.079
+value: 2.518 policy: 0.487 reward: 2.079
+value: 2.311 policy: 0.412 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 45 episodes and trained for 36 epochs.
+
+Training loop 9
+value: 2.483 policy: 0.428 reward: 2.079
+value: 2.518 policy: 0.431 reward: 2.079
+value: 2.448 policy: 0.42 reward: 2.079
+value: 2.406 policy: 0.441 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 50 episodes and trained for 40 epochs.
+
+Training loop 10
+Saved model
+value: 2.379 policy: 0.466 reward: 2.079
+value: 2.403 policy: 0.397 reward: 2.079
+value: 2.534 policy: 0.42 reward: 2.079
+value: 2.421 policy: 0.512 reward: 2.079
+Train score: 0.4
+Eval score: 1.0
+MuZero played 55 episodes and trained for 44 epochs.
+
+Training loop 11
+value: 2.346 policy: 0.425 reward: 2.079
+value: 2.396 policy: 0.466 reward: 2.079
+value: 2.491 policy: 0.385 reward: 2.079
+value: 2.404 policy: 0.415 reward: 2.079
+Train score: 0.0
+Eval score: 0.0
+MuZero played 60 episodes and trained for 48 epochs.
+
+Training loop 12
+value: 2.345 policy: 0.449 reward: 2.079
+value: 2.41 policy: 0.472 reward: 2.079
+value: 2.464 policy: 0.43 reward: 2.079
+value: 2.29 policy: 0.39 reward: 2.079
+Train score: 0.2
+Eval score: 1.0
+MuZero played 65 episodes and trained for 52 epochs.
+
+Training loop 13
+value: 2.481 policy: 0.399 reward: 2.079
+value: 2.376 policy: 0.422 reward: 2.079
+value: 2.464 policy: 0.441 reward: 2.079
+value: 2.322 policy: 0.454 reward: 2.079
+Train score: 0.2
+Eval score: 1.0
+MuZero played 70 episodes and trained for 56 epochs.
+
+Training loop 14
+value: 2.498 policy: 0.422 reward: 2.079
+value: 2.436 policy: 0.346 reward: 2.079
+value: 2.466 policy: 0.418 reward: 2.079
+value: 2.365 policy: 0.411 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 75 episodes and trained for 60 epochs.
+
+Training loop 15
+value: 2.392 policy: 0.444 reward: 2.079
+value: 2.349 policy: 0.42 reward: 2.079
+value: 2.644 policy: 0.425 reward: 2.079
+value: 2.484 policy: 0.46 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 80 episodes and trained for 64 epochs.
+
+Training loop 16
+value: 2.323 policy: 0.456 reward: 2.079
+value: 2.356 policy: 0.401 reward: 2.079
+value: 2.48 policy: 0.392 reward: 2.079
+value: 2.47 policy: 0.388 reward: 2.079
+Train score: 0.0
+Eval score: 0.0
+MuZero played 85 episodes and trained for 68 epochs.
+
+Training loop 17
+value: 2.391 policy: 0.452 reward: 2.079
+value: 2.511 policy: 0.488 reward: 2.079
+value: 2.345 policy: 0.366 reward: 2.079
+value: 2.41 policy: 0.367 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 90 episodes and trained for 72 epochs.
+
+Training loop 18
+value: 2.391 policy: 0.382 reward: 2.079
+value: 2.465 policy: 0.441 reward: 2.079
+value: 2.448 policy: 0.44 reward: 2.079
+value: 2.416 policy: 0.394 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 95 episodes and trained for 76 epochs.
+
+Training loop 19
+value: 2.539 policy: 0.506 reward: 2.079
+value: 2.38 policy: 0.427 reward: 2.079
+value: 2.322 policy: 0.425 reward: 2.079
+value: 2.507 policy: 0.45 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 100 episodes and trained for 80 epochs.
+
+Training loop 20
+Saved model
+value: 2.552 policy: 0.438 reward: 2.079
+value: 2.425 policy: 0.398 reward: 2.079
+value: 2.409 policy: 0.404 reward: 2.079
+value: 2.373 policy: 0.408 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 105 episodes and trained for 84 epochs.
+
+Training loop 21
+value: 2.523 policy: 0.458 reward: 2.079
+value: 2.468 policy: 0.42 reward: 2.079
+value: 2.402 policy: 0.42 reward: 2.079
+value: 2.711 policy: 0.475 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 110 episodes and trained for 88 epochs.
+
+Training loop 22
+value: 2.472 policy: 0.425 reward: 2.079
+value: 2.383 policy: 0.485 reward: 2.079
+value: 2.332 policy: 0.484 reward: 2.079
+value: 2.488 policy: 0.422 reward: 2.079
+Train score: 0.0
+Eval score: 0.0
+MuZero played 115 episodes and trained for 92 epochs.
+
+Training loop 23
+value: 2.418 policy: 0.385 reward: 2.079
+value: 2.501 policy: 0.493 reward: 2.079
+value: 2.569 policy: 0.492 reward: 2.079
+value: 2.447 policy: 0.478 reward: 2.079
+Train score: 0.0
+Eval score: 1.0
+MuZero played 120 episodes and trained for 96 epochs.
+
+Training loop 24
+value: 2.435 policy: 0.427 reward: 2.079
+value: 2.456 policy: 0.46 reward: 2.079
+value: 2.362 policy: 0.458 reward: 2.079
+value: 2.373 policy: 0.424 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 125 episodes and trained for 100 epochs.
+
+Training loop 25
+value: 2.326 policy: 0.438 reward: 2.079
+value: 2.418 policy: 0.491 reward: 2.079
+value: 2.423 policy: 0.433 reward: 2.079
+value: 2.444 policy: 0.478 reward: 2.079
+Train score: 0.6
+Eval score: 1.0
+MuZero played 130 episodes and trained for 104 epochs.
+
+Training loop 26
+value: 2.404 policy: 0.414 reward: 2.079
+value: 2.337 policy: 0.439 reward: 2.079
+value: 2.483 policy: 0.476 reward: 2.079
+value: 2.32 policy: 0.427 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 135 episodes and trained for 108 epochs.
+
+Training loop 27
+value: 2.526 policy: 0.363 reward: 2.079
+value: 2.465 policy: 0.469 reward: 2.079
+value: 2.45 policy: 0.411 reward: 2.079
+value: 2.437 policy: 0.4 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 140 episodes and trained for 112 epochs.
+
+Training loop 28
+value: 2.483 policy: 0.388 reward: 2.079
+value: 2.351 policy: 0.388 reward: 2.079
+value: 2.473 policy: 0.462 reward: 2.079
+value: 2.431 policy: 0.424 reward: 2.079
+Train score: 0.6
+Eval score: 1.0
+MuZero played 145 episodes and trained for 116 epochs.
+
+Training loop 29
+value: 2.324 policy: 0.438 reward: 2.079
+value: 2.489 policy: 0.48 reward: 2.079
+value: 2.459 policy: 0.441 reward: 2.079
+value: 2.449 policy: 0.343 reward: 2.079
+Train score: 0.8
+Eval score: 0.0
+MuZero played 150 episodes and trained for 120 epochs.
+
+Training loop 30
+Saved model
+value: 2.441 policy: 0.442 reward: 2.079
+value: 2.394 policy: 0.445 reward: 2.079
+value: 2.476 policy: 0.431 reward: 2.079
+value: 2.456 policy: 0.499 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 155 episodes and trained for 124 epochs.
+
+Training loop 31
+value: 2.518 policy: 0.398 reward: 2.079
+value: 2.494 policy: 0.465 reward: 2.079
+value: 2.41 policy: 0.444 reward: 2.079
+value: 2.479 policy: 0.46 reward: 2.079
+Train score: 0.2
+Eval score: 1.0
+MuZero played 160 episodes and trained for 128 epochs.
+
+Training loop 32
+value: 2.354 policy: 0.446 reward: 2.079
+value: 2.506 policy: 0.451 reward: 2.079
+value: 2.381 policy: 0.437 reward: 2.079
+value: 2.446 policy: 0.46 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 165 episodes and trained for 132 epochs.
+
+Training loop 33
+value: 2.532 policy: 0.443 reward: 2.079
+value: 2.444 policy: 0.412 reward: 2.079
+value: 2.422 policy: 0.359 reward: 2.079
+value: 2.44 policy: 0.432 reward: 2.079
+Train score: 0.8
+Eval score: 1.0
+MuZero played 170 episodes and trained for 136 epochs.
+
+Training loop 34
+value: 2.519 policy: 0.437 reward: 2.079
+value: 2.562 policy: 0.447 reward: 2.079
+value: 2.349 policy: 0.493 reward: 2.079
+value: 2.462 policy: 0.454 reward: 2.079
+Train score: 0.4
+Eval score: 1.0
+MuZero played 175 episodes and trained for 140 epochs.
+
+Training loop 35
+value: 2.341 policy: 0.454 reward: 2.079
+value: 2.505 policy: 0.458 reward: 2.079
+value: 2.524 policy: 0.408 reward: 2.079
+value: 2.54 policy: 0.444 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 180 episodes and trained for 144 epochs.
+
+Training loop 36
+value: 2.468 policy: 0.445 reward: 2.079
+value: 2.373 policy: 0.42 reward: 2.079
+value: 2.509 policy: 0.48 reward: 2.079
+value: 2.567 policy: 0.424 reward: 2.079
+Train score: 0.0
+Eval score: 0.0
+MuZero played 185 episodes and trained for 148 epochs.
+
+Training loop 37
+value: 2.501 policy: 0.475 reward: 2.079
+value: 2.594 policy: 0.497 reward: 2.079
+value: 2.401 policy: 0.359 reward: 2.079
+value: 2.502 policy: 0.41 reward: 2.079
+Train score: 0.6
+Eval score: 1.0
+MuZero played 190 episodes and trained for 152 epochs.
+
+Training loop 38
+value: 2.461 policy: 0.452 reward: 2.08
+value: 2.474 policy: 0.369 reward: 2.079
+value: 2.418 policy: 0.374 reward: 2.079
+value: 2.629 policy: 0.482 reward: 2.079
+Train score: 0.0
+Eval score: 1.0
+MuZero played 195 episodes and trained for 156 epochs.
+
+Training loop 39
+value: 2.405 policy: 0.468 reward: 2.079
+value: 2.521 policy: 0.412 reward: 2.079
+value: 2.417 policy: 0.463 reward: 2.079
+value: 2.592 policy: 0.454 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 200 episodes and trained for 160 epochs.
+
+Training loop 40
+Saved model
+value: 2.485 policy: 0.451 reward: 2.079
+value: 2.43 policy: 0.445 reward: 2.08
+value: 2.431 policy: 0.496 reward: 2.079
+value: 2.439 policy: 0.437 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 205 episodes and trained for 164 epochs.
+
+Training loop 41
+value: 2.533 policy: 0.441 reward: 2.079
+value: 2.479 policy: 0.482 reward: 2.079
+value: 2.408 policy: 0.486 reward: 2.079
+value: 2.379 policy: 0.471 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 210 episodes and trained for 168 epochs.
+
+Training loop 42
+value: 2.608 policy: 0.452 reward: 2.079
+value: 2.464 policy: 0.418 reward: 2.079
+value: 2.445 policy: 0.499 reward: 2.079
+value: 2.393 policy: 0.373 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 215 episodes and trained for 172 epochs.
+
+Training loop 43
+value: 2.35 policy: 0.437 reward: 2.079
+value: 2.398 policy: 0.451 reward: 2.079
+value: 2.515 policy: 0.509 reward: 2.079
+value: 2.461 policy: 0.46 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 220 episodes and trained for 176 epochs.
+
+Training loop 44
+value: 2.488 policy: 0.469 reward: 2.079
+value: 2.406 policy: 0.414 reward: 2.079
+value: 2.41 policy: 0.424 reward: 2.079
+value: 2.424 policy: 0.432 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 225 episodes and trained for 180 epochs.
+
+Training loop 45
+value: 2.342 policy: 0.42 reward: 2.079
+value: 2.466 policy: 0.417 reward: 2.079
+value: 2.529 policy: 0.448 reward: 2.079
+value: 2.498 policy: 0.413 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 230 episodes and trained for 184 epochs.
+
+Training loop 46
+value: 2.322 policy: 0.441 reward: 2.079
+value: 2.484 policy: 0.42 reward: 2.079
+value: 2.317 policy: 0.492 reward: 2.079
+value: 2.445 policy: 0.486 reward: 2.079
+Train score: 0.2
+Eval score: 1.0
+MuZero played 235 episodes and trained for 188 epochs.
+
+Training loop 47
+value: 2.42 policy: 0.419 reward: 2.079
+value: 2.436 policy: 0.437 reward: 2.079
+value: 2.442 policy: 0.476 reward: 2.079
+value: 2.4 policy: 0.442 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 240 episodes and trained for 192 epochs.
+
+Training loop 48
+value: 2.471 policy: 0.48 reward: 2.079
+value: 2.564 policy: 0.454 reward: 2.079
+value: 2.496 policy: 0.452 reward: 2.079
+value: 2.363 policy: 0.371 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 245 episodes and trained for 196 epochs.
+
+Training loop 49
+value: 2.375 policy: 0.435 reward: 2.079
+value: 2.511 policy: 0.377 reward: 2.079
+value: 2.463 policy: 0.386 reward: 2.079
+value: 2.511 policy: 0.435 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 250 episodes and trained for 200 epochs.
+
+Training loop 50
+Saved model
+value: 2.45 policy: 0.447 reward: 2.079
+value: 2.407 policy: 0.418 reward: 2.079
+value: 2.47 policy: 0.434 reward: 2.079
+value: 2.463 policy: 0.492 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 255 episodes and trained for 204 epochs.
+
+Training loop 51
+value: 2.566 policy: 0.475 reward: 2.079
+value: 2.456 policy: 0.482 reward: 2.079
+value: 2.523 policy: 0.511 reward: 2.079
+value: 2.496 policy: 0.438 reward: 2.079
+Train score: 0.0
+Eval score: 0.0
+MuZero played 260 episodes and trained for 208 epochs.
+
+Training loop 52
+value: 2.454 policy: 0.446 reward: 2.079
+value: 2.503 policy: 0.46 reward: 2.079
+value: 2.478 policy: 0.48 reward: 2.08
+value: 2.459 policy: 0.387 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 265 episodes and trained for 212 epochs.
+
+Training loop 53
+value: 2.475 policy: 0.45 reward: 2.08
+value: 2.385 policy: 0.43 reward: 2.079
+value: 2.419 policy: 0.487 reward: 2.079
+value: 2.438 policy: 0.394 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 270 episodes and trained for 216 epochs.
+
+Training loop 54
+value: 2.409 policy: 0.429 reward: 2.079
+value: 2.543 policy: 0.436 reward: 2.079
+value: 2.457 policy: 0.438 reward: 2.079
+value: 2.588 policy: 0.456 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 275 episodes and trained for 220 epochs.
+
+Training loop 55
+value: 2.422 policy: 0.449 reward: 2.079
+value: 2.563 policy: 0.382 reward: 2.079
+value: 2.492 policy: 0.457 reward: 2.079
+value: 2.423 policy: 0.504 reward: 2.08
+Train score: 0.6
+Eval score: 1.0
+MuZero played 280 episodes and trained for 224 epochs.
+
+Training loop 56
+value: 2.469 policy: 0.48 reward: 2.079
+value: 2.537 policy: 0.394 reward: 2.08
+value: 2.487 policy: 0.438 reward: 2.082
+value: 2.511 policy: 0.403 reward: 2.08
+Train score: 0.2
+Eval score: 0.0
+MuZero played 285 episodes and trained for 228 epochs.
+
+Training loop 57
+value: 2.492 policy: 0.423 reward: 2.081
+value: 2.562 policy: 0.475 reward: 2.08
+value: 2.534 policy: 0.486 reward: 2.082
+value: 2.398 policy: 0.399 reward: 2.079
+Train score: 0.4
+Eval score: 1.0
+MuZero played 290 episodes and trained for 232 epochs.
+
+Training loop 58
+value: 2.466 policy: 0.39 reward: 2.079
+value: 2.45 policy: 0.454 reward: 2.079
+value: 2.442 policy: 0.422 reward: 2.079
+value: 2.442 policy: 0.448 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 295 episodes and trained for 236 epochs.
+
+Training loop 59
+value: 2.435 policy: 0.436 reward: 2.079
+value: 2.407 policy: 0.371 reward: 2.079
+value: 2.417 policy: 0.458 reward: 2.079
+value: 2.455 policy: 0.45 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 300 episodes and trained for 240 epochs.
+
+Training loop 60
+Saved model
+value: 2.498 policy: 0.417 reward: 2.079
+value: 2.417 policy: 0.416 reward: 2.079
+value: 2.431 policy: 0.38 reward: 2.079
+value: 2.55 policy: 0.476 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 305 episodes and trained for 244 epochs.
+
+Training loop 61
+value: 2.349 policy: 0.433 reward: 2.079
+value: 2.548 policy: 0.441 reward: 2.079
+value: 2.395 policy: 0.443 reward: 2.079
+value: 2.563 policy: 0.505 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 310 episodes and trained for 248 epochs.
+
+Training loop 62
+value: 2.378 policy: 0.426 reward: 2.079
+value: 2.551 policy: 0.397 reward: 2.079
+value: 2.412 policy: 0.475 reward: 2.079
+value: 2.492 policy: 0.398 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 315 episodes and trained for 252 epochs.
+
+Training loop 63
+value: 2.416 policy: 0.511 reward: 2.079
+value: 2.461 policy: 0.505 reward: 2.079
+value: 2.498 policy: 0.482 reward: 2.079
+value: 2.518 policy: 0.445 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 320 episodes and trained for 256 epochs.
+
+Training loop 64
+value: 2.449 policy: 0.436 reward: 2.079
+value: 2.536 policy: 0.412 reward: 2.079
+value: 2.485 policy: 0.463 reward: 2.08
+value: 2.488 policy: 0.473 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 325 episodes and trained for 260 epochs.
+
+Training loop 65
+value: 2.492 policy: 0.403 reward: 2.08
+value: 2.429 policy: 0.471 reward: 2.081
+value: 2.524 policy: 0.463 reward: 2.079
+value: 2.463 policy: 0.436 reward: 2.081
+Train score: 0.2
+Eval score: 0.0
+MuZero played 330 episodes and trained for 264 epochs.
+
+Training loop 66
+value: 2.343 policy: 0.444 reward: 2.079
+value: 2.382 policy: 0.387 reward: 2.079
+value: 2.537 policy: 0.462 reward: 2.079
+value: 2.488 policy: 0.413 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 335 episodes and trained for 268 epochs.
+
+Training loop 67
+value: 2.506 policy: 0.45 reward: 2.079
+value: 2.473 policy: 0.464 reward: 2.08
+value: 2.571 policy: 0.436 reward: 2.079
+value: 2.448 policy: 0.496 reward: 2.08
+Train score: 0.0
+Eval score: 0.0
+MuZero played 340 episodes and trained for 272 epochs.
+
+Training loop 68
+value: 2.38 policy: 0.435 reward: 2.079
+value: 2.39 policy: 0.435 reward: 2.079
+value: 2.48 policy: 0.434 reward: 2.079
+value: 2.559 policy: 0.465 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 345 episodes and trained for 276 epochs.
+
+Training loop 69
+value: 2.475 policy: 0.474 reward: 2.079
+value: 2.517 policy: 0.446 reward: 2.079
+value: 2.503 policy: 0.432 reward: 2.079
+value: 2.385 policy: 0.398 reward: 2.08
+Train score: 0.6
+Eval score: 0.0
+MuZero played 350 episodes and trained for 280 epochs.
+
+Training loop 70
+Saved model
+value: 2.599 policy: 0.48 reward: 2.079
+value: 2.465 policy: 0.442 reward: 2.08
+value: 2.465 policy: 0.475 reward: 2.079
+value: 2.497 policy: 0.444 reward: 2.079
+Train score: 0.4
+Eval score: 1.0
+MuZero played 355 episodes and trained for 284 epochs.
+
+Training loop 71
+value: 2.406 policy: 0.442 reward: 2.079
+value: 2.402 policy: 0.441 reward: 2.079
+value: 2.356 policy: 0.453 reward: 2.079
+value: 2.498 policy: 0.425 reward: 2.079
+Train score: 0.0
+Eval score: 0.0
+MuZero played 360 episodes and trained for 288 epochs.
+
+Training loop 72
+value: 2.433 policy: 0.419 reward: 2.079
+value: 2.573 policy: 0.403 reward: 2.079
+value: 2.382 policy: 0.423 reward: 2.079
+value: 2.468 policy: 0.444 reward: 2.079
+Train score: 0.6
+Eval score: 1.0
+MuZero played 365 episodes and trained for 292 epochs.
+
+Training loop 73
+value: 2.539 policy: 0.413 reward: 2.079
+value: 2.591 policy: 0.462 reward: 2.079
+value: 2.513 policy: 0.417 reward: 2.079
+value: 2.387 policy: 0.406 reward: 2.08
+Train score: 0.4
+Eval score: 0.0
+MuZero played 370 episodes and trained for 296 epochs.
+
+Training loop 74
+value: 2.493 policy: 0.349 reward: 2.079
+value: 2.434 policy: 0.426 reward: 2.08
+value: 2.518 policy: 0.458 reward: 2.079
+value: 2.509 policy: 0.464 reward: 2.08
+Train score: 0.2
+Eval score: 0.0
+MuZero played 375 episodes and trained for 300 epochs.
+
+Training loop 75
+value: 2.446 policy: 0.389 reward: 2.082
+value: 2.531 policy: 0.441 reward: 2.08
+value: 2.452 policy: 0.447 reward: 2.082
+value: 2.484 policy: 0.435 reward: 2.079
+Train score: 0.4
+Eval score: 1.0
+MuZero played 380 episodes and trained for 304 epochs.
+
+Training loop 76
+value: 2.461 policy: 0.406 reward: 2.081
+value: 2.565 policy: 0.422 reward: 2.079
+value: 2.538 policy: 0.452 reward: 2.082
+value: 2.475 policy: 0.393 reward: 2.079
+Train score: 0.2
+Eval score: 1.0
+MuZero played 385 episodes and trained for 308 epochs.
+
+Training loop 77
+value: 2.532 policy: 0.457 reward: 2.081
+value: 2.405 policy: 0.43 reward: 2.079
+value: 2.577 policy: 0.448 reward: 2.079
+value: 2.422 policy: 0.516 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 390 episodes and trained for 312 epochs.
+
+Training loop 78
+value: 2.516 policy: 0.411 reward: 2.079
+value: 2.413 policy: 0.441 reward: 2.079
+value: 2.475 policy: 0.425 reward: 2.079
+value: 2.537 policy: 0.467 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 395 episodes and trained for 316 epochs.
+
+Training loop 79
+value: 2.445 policy: 0.456 reward: 2.081
+value: 2.472 policy: 0.46 reward: 2.079
+value: 2.481 policy: 0.448 reward: 2.079
+value: 2.572 policy: 0.429 reward: 2.079
+Train score: 0.6
+Eval score: 0.0
+MuZero played 400 episodes and trained for 320 epochs.
+
+Training loop 80
+Saved model
+value: 2.594 policy: 0.498 reward: 2.081
+value: 2.482 policy: 0.472 reward: 2.08
+value: 2.439 policy: 0.438 reward: 2.079
+value: 2.351 policy: 0.428 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 405 episodes and trained for 324 epochs.
+
+Training loop 81
+value: 2.463 policy: 0.454 reward: 2.079
+value: 2.493 policy: 0.474 reward: 2.079
+value: 2.367 policy: 0.331 reward: 2.079
+value: 2.505 policy: 0.488 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 410 episodes and trained for 328 epochs.
+
+Training loop 82
+value: 2.378 policy: 0.408 reward: 2.079
+value: 2.427 policy: 0.458 reward: 2.079
+value: 2.46 policy: 0.416 reward: 2.079
+value: 2.602 policy: 0.473 reward: 2.079
+Train score: 0.2
+Eval score: 1.0
+MuZero played 415 episodes and trained for 332 epochs.
+
+Training loop 83
+value: 2.469 policy: 0.407 reward: 2.079
+value: 2.529 policy: 0.442 reward: 2.079
+value: 2.457 policy: 0.456 reward: 2.08
+value: 2.504 policy: 0.448 reward: 2.079
+Train score: 0.0
+Eval score: 1.0
+MuZero played 420 episodes and trained for 336 epochs.
+
+Training loop 84
+value: 2.363 policy: 0.39 reward: 2.08
+value: 2.408 policy: 0.505 reward: 2.079
+value: 2.33 policy: 0.44 reward: 2.079
+value: 2.567 policy: 0.446 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 425 episodes and trained for 340 epochs.
+
+Training loop 85
+value: 2.457 policy: 0.452 reward: 2.079
+value: 2.431 policy: 0.359 reward: 2.079
+value: 2.513 policy: 0.474 reward: 2.079
+value: 2.494 policy: 0.425 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 430 episodes and trained for 344 epochs.
+
+Training loop 86
+value: 2.346 policy: 0.378 reward: 2.079
+value: 2.576 policy: 0.435 reward: 2.079
+value: 2.585 policy: 0.432 reward: 2.079
+value: 2.448 policy: 0.416 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 435 episodes and trained for 348 epochs.
+
+Training loop 87
+value: 2.542 policy: 0.475 reward: 2.079
+value: 2.384 policy: 0.427 reward: 2.079
+value: 2.427 policy: 0.441 reward: 2.079
+value: 2.484 policy: 0.433 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 440 episodes and trained for 352 epochs.
+
+Training loop 88
+value: 2.489 policy: 0.436 reward: 2.079
+value: 2.423 policy: 0.496 reward: 2.079
+value: 2.446 policy: 0.411 reward: 2.079
+value: 2.457 policy: 0.489 reward: 2.079
+Train score: 0.2
+Eval score: 0.0
+MuZero played 445 episodes and trained for 356 epochs.
+
+Training loop 89
+value: 2.496 policy: 0.431 reward: 2.079
+value: 2.327 policy: 0.462 reward: 2.079
+value: 2.354 policy: 0.393 reward: 2.079
+value: 2.508 policy: 0.385 reward: 2.079
+Train score: 0.4
+Eval score: 0.0
+MuZero played 450 episodes and trained for 360 epochs.
+
+Training loop 90
+Saved model
+value: 2.44 policy: 0.397 reward: 2.079
+value: 2.589 policy: 0.406 reward: 2.079
+value: 2.501 policy: 0.492 reward: 2.079
+value: 2.542 policy: 0.446 reward: 2.08
+Train score: 0.2
+Eval score: 1.0
+MuZero played 455 episodes and trained for 364 epochs.
+
+Training loop 91
+value: 2.448 policy: 0.386 reward: 2.084
+value: 2.43 policy: 0.474 reward: 2.08
+value: 2.467 policy: 0.46 reward: 2.079
+value: 2.536 policy: 0.472 reward: 2.079
+Train score: 0.6
+Eval score: 1.0
+MuZero played 460 episodes and trained for 368 epochs.
+
+Training loop 92
+value: 2.427 policy: 0.369 reward: 2.079
+value: 2.404 policy: 0.451 reward: 2.079
+value: 2.465 policy: 0.463 reward: 2.079
+value: 2.479 policy: 0.424 reward: 2.079
+Train score: 0.8
+Eval score: 0.0
+MuZero played 465 episodes and trained for 372 epochs.
+
+Training loop 93
+value: 2.378 policy: 0.355 reward: 2.079
+value: 2.451 policy: 0.479 reward: 2.08
+value: 2.428 policy: 0.345 reward: 2.079
+value: 2.457 policy: 0.447 reward: 2.08
+Train score: 0.6
+Eval score: 0.0
+MuZero played 470 episodes and trained for 376 epochs.
+
+Training loop 94
+value: 2.468 policy: 0.444 reward: 2.079
+value: 2.556 policy: 0.464 reward: 2.08
+value: 2.381 policy: 0.478 reward: 2.096
+value: 2.595 policy: 0.467 reward: 2.08
+Train score: 0.6
+Eval score: 1.0
+MuZero played 475 episodes and trained for 380 epochs.
+
+Training loop 95
+value: 2.522 policy: 0.446 reward: 2.091
+value: 2.494 policy: 0.436 reward: 2.08
+value: 2.458 policy: 0.467 reward: 2.093
+value: 2.456 policy: 0.441 reward: 2.08
+Train score: 0.4
+Eval score: 0.0
+MuZero played 480 episodes and trained for 384 epochs.
+
+Training loop 96
+value: 2.463 policy: 0.467 reward: 2.079
+value: 2.495 policy: 0.493 reward: 2.08
+value: 2.449 policy: 0.471 reward: 2.079
+value: 2.49 policy: 0.445 reward: 2.08
+Train score: 0.4
+Eval score: 0.0
+MuZero played 485 episodes and trained for 388 epochs.
+
+Training loop 97
+value: 2.454 policy: 0.383 reward: 2.088
+value: 2.461 policy: 0.408 reward: 2.08
+value: 2.486 policy: 0.479 reward: 2.091
+value: 2.487 policy: 0.46 reward: 2.08
+Train score: 0.6
+Eval score: 0.0
+MuZero played 490 episodes and trained for 392 epochs.
+
+Training loop 98
+value: 2.446 policy: 0.418 reward: 2.087
+value: 2.489 policy: 0.406 reward: 2.079
+value: 2.409 policy: 0.421 reward: 2.087
+value: 2.502 policy: 0.507 reward: 2.08
+Train score: 0.0
+Eval score: 1.0
+MuZero played 495 episodes and trained for 396 epochs.
+
+Training loop 99
+value: 2.429 policy: 0.385 reward: 2.085
+value: 2.475 policy: 0.448 reward: 2.079
+value: 2.53 policy: 0.446 reward: 2.079
+value: 2.535 policy: 0.485 reward: 2.08
+Train score: 0.6
+Eval score: 0.0
+MuZero played 500 episodes and trained for 400 epochs.
+
+Training finished
+Average training score:  0.3259999999999998
+Saved model
+Final Eval:  0.33 ({'win': 59, 'loss': 141}, 0)
+Done
+
+Script done on Wed 09 Jun 2021 09:30:12 PM PDT
