@@ -44,12 +44,13 @@ def muzero(config: MuZeroConfig, test_config: MuZeroConfig, save_path, load=Fals
             save_all_networks(storage, save_path)
         storage.latest_network().train()
         score_train, _ = run_selfplay(config, storage, replay_buffer, config.nb_episodes, render=False)
+        storage.current_network.train()
         train_network(config, storage, replay_buffer, config.nb_epochs, loop)
 
         print("Train score:", score_train)
         storage.latest_network().eval()
+        storage.current_network.eval()
         eval_score, game_sorts, stats  = run_eval(test_config, storage, con['EVAL_GAMES'])
-
 
         print("Eval score:", eval_score)
         logging.info(eval_score)
@@ -123,10 +124,11 @@ if __name__ == '__main__':
     weight_path = get_weight_path()
     logging.basicConfig(filename=os.path.join(weight_path,'log'), level=logging.INFO)
     storage = muzero(config, test_config,weight_path,load=False)
-    final_eval, game_sorts, stats = run_eval(test_config, storage, con['final_eval'], plot=True, weight_path=weight_path)
-    sort_file = os.path.join(weight_path, "game_sort.txt")
-    with open(sort_file, 'w') as g:
-        g.write(str(game_sorts))
+    for i in range(100):
+        final_eval, game_sorts, stats = run_eval(test_config, storage, con['final_eval'], plot=True, weight_path=weight_path)
+        sort_file = os.path.join(weight_path, "game_sort.txt")
+        with open(sort_file, 'a+') as g:
+            g.write(str(game_sorts))
 
     print("Final Eval: ",final_eval,stats)
     save_model_stats(weight_path,stats)

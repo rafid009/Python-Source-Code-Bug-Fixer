@@ -30,10 +30,11 @@ def simulate(image, actions):
         i = 0
         # print('actions batch: ', actions)
         for acts in actions:
-            path_str += '-' + '-'.join((np.array(acts) + 1).astype(str))
+            path_str += '-' + '-'.join((np.array(acts)).astype(str))
             next_slice = U[i, get_index_from_action_path(path_str), :, :]
             slices.append(next_slice)
             i += 1
+            path_str = '0'
         next_state = torch.stack(slices, 0)
     X += torch.unsqueeze(next_state, 1)
     U = U.view(-1, U_size)

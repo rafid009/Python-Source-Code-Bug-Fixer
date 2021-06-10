@@ -60,8 +60,8 @@ def _check_win_loss(returns):
     for game in returns:
         if game == con['REWARDS']['win']:
             stats['win'] += 1
-        elif game == con['REWARDS']['tie']:
-            stats['tie'] += 1
+        # elif game == con['REWARDS']['tie']:
+        #     stats['tie'] += 1
         elif game == con['REWARDS']['loss']:
             stats['loss'] +=1
     return stats

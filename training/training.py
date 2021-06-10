@@ -38,7 +38,7 @@ def train_network(config: MuZeroConfig, storage: SharedStorage, replay_buffer: R
 def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
 
     def scale_gradient(tensor, scale: float):
-        """Trick function to scale the gradient in tensorflow"""
+        """Trick function to scale the gradient in pytorch"""
         return (1. - scale) * torch.Tensor.detach(tensor) + scale * tensor
     def L2(weights):
         alpha = con['spectral_weight_decay']
@@ -51,7 +51,7 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
 
         batch_size = len(target_value_batch)
         targets = torch.zeros(batch_size, 4).cuda()
-        floor_value = torch.floor(target_value_batch).type(torch.LongTensor).cuda()
+        floor_value = torch.floor(target_value_batch).type(torch.cuda.LongTensor)
         rest = target_value_batch - floor_value
         targets[range(batch_size), floor_value+1] = 1 - rest
         targets[range(batch_size), floor_value + 2] = rest
@@ -113,6 +113,7 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
                                                                     mask_time_batch, dynamic_mask_time_batch):
             print('inside loss calc loop')
             target_value_batch, target_reward_batch2, target_policy_batch = zip(*targets_batch)
+            print('target valu btch: ', target_value_batch)
             i +=1
             # print('dyn mask: ', torch.as_tensor(dynamic_mask).shape, '\nmask: ', torch.as_tensor(mask).shape, '\nbatch: ', len(image_batch))
             # Only execute BPTT for elements with an action
@@ -120,19 +121,23 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
             # print("img batch before: ", type(image_batch), torch.Tensor(image_batch).shape,'\n',image_batch)
             image_batch = torch.as_tensor(image_batch)[torch.as_tensor(dynamic_mask)==True, :] #torch.masked_select(image_batch, dynamic_mask)
             # print('img batch: ', image_batch.shape)
-            target_reward_batch1 = target_reward_batch1[mask==True] #torch.masked_select(target_reward_batch1, mask)
+            target_reward_batch1 = torch.as_tensor(target_reward_batch1)[mask].cuda() #torch.masked_select(target_reward_batch1, mask)
 
             games1 = [games0[g] for g in range(len(games0)) if dynamic_mask[g]]
-            target_value_batch = target_value_batch[mask==True] #torch.masked_select(target_value_batch, mask)
+            target_value_batch = torch.as_tensor(target_value_batch)[mask].cuda() #torch.masked_select(target_value_batch, mask)
             # Creating conditioned_representation: concatenate representations with actions batch
             # actions_batch = F.one_hot(actions_batch, network.action_size)
-
-            image1 = simulate(image_batch, actions_history_batch[0:len(image_batch)])
+            actions_history_batch = np.array(actions_history_batch)[dynamic_mask].tolist()
+            print('history: ', actions_history_batch)
+            print('history cutoff: ', actions_history_batch[0:len(image_batch)])
+            print('act time btch:', actions_time_batch)
+            print('image: ', image_batch, '\nimg btch sz: ',image_batch.shape)
+            image1 = simulate(image_batch, actions_history_batch)
             # Recurrent step from conditioned representation: recurrent + prediction networks
             value_batch, reward_batch, policy_batch = network.recurrent_model(Variable(image1).cuda())
-            print('values: ', value_batch)
-            print('rewards: ',reward_batch)
-            print('policies: ', policy_batch)
+            # print('values: ', value_batch)
+            # print('rewards: ',reward_batch)
+            # print('policies: ', policy_batch)
             # Only execute BPTT for elements with a policy target
             target_policy_batch = [policy for policy, b in zip(target_policy_batch, mask) if b]
             mask_policy = list(map(lambda l: bool(l), target_policy_batch))
