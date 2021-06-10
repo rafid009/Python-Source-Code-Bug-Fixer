@@ -138,7 +138,7 @@ def playtest_config() -> MuZeroConfig:
 
     return MuZeroConfig(
         game=SpecimenWrapper,
-        nb_training_loop=con['loops'],
+        nb_training_loop=con['eval_loop'],
         nb_episodes=con['episodes'],
         nb_epochs=con['epochs'],
         network_args={'action_size': con['conditions']},

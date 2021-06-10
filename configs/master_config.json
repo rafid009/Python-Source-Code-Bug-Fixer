@@ -56,7 +56,7 @@
     "td_steps":11,
     "lr":0.0001,
     "max_J": 49,
-
+    "eval_loop": 100,
 
     "max_moves":10,
     "REWARDS":{

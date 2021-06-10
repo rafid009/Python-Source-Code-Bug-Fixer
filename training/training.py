@@ -27,9 +27,7 @@ def train_network(config: MuZeroConfig, storage: SharedStorage, replay_buffer: R
         batch = replay_buffer.sample_batch(config.num_unroll_steps, config.td_steps)
         if i == 0:
             network.record_this = storage.record_this
-        print('before update weights')
         update_weights(optimizer_info, network, batch)
-        print('after update weights')
         storage.save_network(network.training_steps, network)
         storage.record_this = network.record_this
 
@@ -51,8 +49,9 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
 
         batch_size = len(target_value_batch)
         targets = torch.zeros(batch_size, 4).cuda()
-        floor_value = torch.floor(target_value_batch).type(torch.cuda.LongTensor)
+        floor_value = torch.floor(target_value_batch)
         rest = target_value_batch - floor_value
+        floor_value = floor_value.type(torch.cuda.LongTensor)
         targets[range(batch_size), floor_value+1] = 1 - rest
         targets[range(batch_size), floor_value + 2] = rest
         targets = targets[:,0:3]
@@ -105,15 +104,11 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
         reward_loss = 0.0
         # Recurrent steps, from action and previous hidden state.
         i = -1
-        print('before loss calc loop')
-        print(zip(targets_time_batch, mask_time_batch, dynamic_mask_time_batch))
-        print('sizes: ', len(targets_time_batch), '\n', mask_time_batch, dynamic_mask_time_batch)
+        
         actions_history_batch = actions_history
         for targets_batch, mask, dynamic_mask in zip(targets_time_batch,
                                                                     mask_time_batch, dynamic_mask_time_batch):
-            print('inside loss calc loop')
             target_value_batch, target_reward_batch2, target_policy_batch = zip(*targets_batch)
-            print('target valu btch: ', target_value_batch)
             i +=1
             # print('dyn mask: ', torch.as_tensor(dynamic_mask).shape, '\nmask: ', torch.as_tensor(mask).shape, '\nbatch: ', len(image_batch))
             # Only execute BPTT for elements with an action
@@ -121,17 +116,14 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
             # print("img batch before: ", type(image_batch), torch.Tensor(image_batch).shape,'\n',image_batch)
             image_batch = torch.as_tensor(image_batch)[torch.as_tensor(dynamic_mask)==True, :] #torch.masked_select(image_batch, dynamic_mask)
             # print('img batch: ', image_batch.shape)
-            target_reward_batch1 = torch.as_tensor(target_reward_batch1)[mask].cuda() #torch.masked_select(target_reward_batch1, mask)
+            target_reward_batch1 = torch.as_tensor(target_reward_batch1,  dtype=torch.float32)[mask].cuda() #torch.masked_select(target_reward_batch1, mask)
 
             games1 = [games0[g] for g in range(len(games0)) if dynamic_mask[g]]
-            target_value_batch = torch.as_tensor(target_value_batch)[mask].cuda() #torch.masked_select(target_value_batch, mask)
+            target_value_batch = torch.as_tensor(target_value_batch, dtype=torch.float32)[mask].cuda() #torch.masked_select(target_value_batch, mask)
             # Creating conditioned_representation: concatenate representations with actions batch
             # actions_batch = F.one_hot(actions_batch, network.action_size)
             actions_history_batch = np.array(actions_history_batch)[dynamic_mask].tolist()
-            print('history: ', actions_history_batch)
-            print('history cutoff: ', actions_history_batch[0:len(image_batch)])
-            print('act time btch:', actions_time_batch)
-            print('image: ', image_batch, '\nimg btch sz: ',image_batch.shape)
+
             image1 = simulate(image_batch, actions_history_batch)
             # Recurrent step from conditioned representation: recurrent + prediction networks
             value_batch, reward_batch, policy_batch = network.recurrent_model(Variable(image1).cuda())
@@ -195,14 +187,11 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
         loss_string = "value: " + str(round(float(value_loss),3)) + " policy: " + str(round(float(policy_loss),3)) + \
               " reward: " + str(round(float(reward_loss),3))
         logging.info(loss_string)
-        print('after loss calc loop')
         print(loss_string)
         return loss
     optimizer = optim.Adam(network.cb_get_variables(), lr=optimizer_info['lr'])
     optimizer.zero_grad()
-    print('before loss function')
     loss = loss()
-    print('after loss function')
     loss.backward()
     optimizer.step()
     network.training_steps += 1

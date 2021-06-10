@@ -1,3 +1,11 @@
 screen -dm bash -c 'script -c "python muzero.py" output.txt'
 
-screen -dm bash -c 'script -c "CUDA_VISIBLE_DEVICES=1 python muzero.py" output.txt'
+This will run the project in a different screen and wirte the console output to output.txt. If you want to get back the console run
+
+screen -r
+
+Otherwise, If you want to just run it in a console without screen, do the following
+
+python muzero.py
+
+Currently, it will train on only 100 train data and run evaluation on another 100 from test data.

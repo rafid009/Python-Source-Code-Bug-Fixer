@@ -34,6 +34,7 @@ def muzero(config: MuZeroConfig, test_config: MuZeroConfig, save_path, load=Fals
 
     storage = SharedStorage(config.new_network(), config.uniform_network(), config.new_optimizer())
     storage.record_this = False
+    train_score = 0
     for loop in range(config.nb_training_loop):
         print("Training loop", loop)
         logging.info("loop: "+str(loop))
@@ -46,7 +47,7 @@ def muzero(config: MuZeroConfig, test_config: MuZeroConfig, save_path, load=Fals
         score_train, _ = run_selfplay(config, storage, replay_buffer, config.nb_episodes, render=False)
         storage.current_network.train()
         train_network(config, storage, replay_buffer, config.nb_epochs, loop)
-
+        train_score += score_train
         print("Train score:", score_train)
         storage.latest_network().eval()
         storage.current_network.eval()
@@ -57,7 +58,7 @@ def muzero(config: MuZeroConfig, test_config: MuZeroConfig, save_path, load=Fals
         print(f"MuZero played {config.nb_episodes * (loop + 1)} "
               f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.\n")
     print("Training finished")
-
+    print('Average training score: ', (train_score/config.nb_training_loop))
     save_all_networks(storage, save_path)
 
     return storage
@@ -124,13 +125,15 @@ if __name__ == '__main__':
     weight_path = get_weight_path()
     logging.basicConfig(filename=os.path.join(weight_path,'log'), level=logging.INFO)
     storage = muzero(config, test_config,weight_path,load=False)
-    for i in range(100):
+    eval_score = 0
+    for i in range(test_config.nb_training_loop):
         final_eval, game_sorts, stats = run_eval(test_config, storage, con['final_eval'], plot=True, weight_path=weight_path)
         sort_file = os.path.join(weight_path, "game_sort.txt")
+        eval_score += final_eval
         with open(sort_file, 'a+') as g:
             g.write(str(game_sorts))
-
-    print("Final Eval: ",final_eval,stats)
+    
+    print("Final Eval: ",eval_score/100,stats)
     save_model_stats(weight_path,stats)
 
     #TODO Set up visualizer install

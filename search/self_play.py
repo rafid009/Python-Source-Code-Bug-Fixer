@@ -7,6 +7,7 @@ from shared_storage.shared_storage import SharedStorage
 from search.mcts import run_mcts, select_action, expand_node, add_exploration_noise
 from training.replay_buffer import ReplayBuffer
 from configs.Configure import configuration as con
+from configs.Configure import stats
 import numpy as np
 import os
 from utils.utils import *
@@ -56,7 +57,7 @@ class Thread:
 
 
 def _check_win_loss(returns):
-    stats = {"win":0,"tie":0,"loss":0}
+    
     for game in returns:
         if game == con['REWARDS']['win']:
             stats['win'] += 1
