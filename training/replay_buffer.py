@@ -14,6 +14,9 @@ class ReplayBuffer(object):
         self.batch_size = config.batch_size
         self.buffer = []
 
+    def dump_memory(self):
+        self.buffer = []
+
     def save_game(self, game):
         if len(self.buffer) > self.window_size:
             self.buffer.pop(0)

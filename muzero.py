@@ -39,6 +39,7 @@ def muzero(config: MuZeroConfig, test_config: MuZeroConfig, save_path, load=Fals
         print("Training loop", loop)
         logging.info("loop: "+str(loop))
 
+        replay_buffer.dump_memory()
         #Record every few loops as specified at con['record_every'] or at the last loop
         if (loop%con['record_every']==0 and loop !=0) or loop==con['loops']:
             # storage.record_this = True
