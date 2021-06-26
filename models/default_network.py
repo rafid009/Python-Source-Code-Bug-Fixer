@@ -166,21 +166,22 @@ class RepresentationNetwork(nn.Module):
         # for U
         self.conv1_1_U = conv3x3(12, 32)
         self.conv1_2_U = conv3x3(32, 64)
+        # self.bn_1_U = nn.BatchNorm2d(64)
         self.max_pool_1_U = nn.MaxPool2d(2)
         
         self.conv2_1_U = conv3x3(64, 64)
         self.conv2_2_U = conv3x3(64, 128)
-        
         self.max_pool_2_U = nn.MaxPool2d(2)
         
         self.conv3_1_U = conv3x3(128, 128)
         self.conv3_2_U = conv3x3(128, 256)
-        
+        self.bn_3_U = nn.BatchNorm2d(256)
         self.max_pool_3_U = nn.MaxPool2d(2)
         
         # for X
         self.conv1_1_X = conv3x3(1, 32)
         self.conv1_2_X = conv3x3(32, 64)
+        # self.bn_1_X = nn.BatchNorm2d(64)
         self.max_pool_1_X = nn.MaxPool2d(2)
         
         self.conv2_1_X = conv3x3(64, 64)
@@ -190,7 +191,7 @@ class RepresentationNetwork(nn.Module):
         
         self.conv3_1_X = conv3x3(128, 128)
         self.conv3_2_X = conv3x3(128, 256)
-        
+        self.bn_3_X = nn.BatchNorm2d(256)
         self.max_pool_3_X = nn.MaxPool2d(2)
         
         
@@ -212,7 +213,7 @@ class RepresentationNetwork(nn.Module):
         u = relu(self.conv2_2_U(u))
         u = self.max_pool_1_U(u)
         u = relu(self.conv3_1_U(u))
-        u = relu(self.conv3_2_U(u))
+        u = relu(self.bn_3_U(self.conv3_2_U(u)))
         u = self.max_pool_1_U(u)
         x = relu(self.conv1_1_X(X))
         x = relu(self.conv1_2_X(x))
@@ -221,7 +222,7 @@ class RepresentationNetwork(nn.Module):
         x = relu(self.conv2_2_X(x))
         x = self.max_pool_1_X(x)
         x = relu(self.conv3_1_X(x))
-        x = relu(self.conv3_2_X(x))
+        x = relu(self.bn_3_X(self.conv3_2_X(x)))
         x = self.max_pool_1_X(x)
         u_out = u.view(-1, shapes['u_out_shape'])
         x_out = x.view(-1, shapes['x_out_shape'])

@@ -10,6 +10,7 @@ import json
 from configs.Configure import configuration as con
 import logging
 import torch
+from utils.utils import get_current_time_in_millis, display_time
 
 torch.cuda.device(torch.device('cuda:1'))
 def save_all_networks(storage, save_path):
@@ -44,14 +45,11 @@ def muzero(config: MuZeroConfig, test_config: MuZeroConfig, save_path, load=Fals
         if (loop%con['record_every']==0 and loop !=0) or loop==con['loops']:
             # storage.record_this = True
             save_all_networks(storage, save_path)
-        storage.latest_network().train()
-        score_train, _ = run_selfplay(config, storage, replay_buffer, config.nb_episodes, render=False)
         storage.current_network.train()
+        score_train, _ = run_selfplay(config, storage, replay_buffer, config.nb_episodes, render=False)
         train_network(config, storage, replay_buffer, config.nb_epochs, loop)
         train_score += score_train
         print("Train score:", score_train)
-        storage.latest_network().eval()
-        storage.current_network.eval()
         eval_score, game_sorts, stats  = run_eval(test_config, storage, con['EVAL_GAMES'])
 
         print("Eval score:", eval_score)
@@ -125,7 +123,10 @@ if __name__ == '__main__':
     test_config = playtest_config()
     weight_path = get_weight_path()
     logging.basicConfig(filename=os.path.join(weight_path,'log'), level=logging.INFO)
+    start = get_current_time_in_millis()
     storage = muzero(config, test_config,weight_path,load=False)
+    end = get_current_time_in_millis()
+    print('Total trainign time for ',con['episodes']*con['loops'], ' episodes is ', display_time((end - start)/1000))
     eval_score = 0
     for i in range(test_config.nb_training_loop):
         final_eval, game_sorts, stats = run_eval(test_config, storage, con['final_eval'], plot=True, weight_path=weight_path)

@@ -23,6 +23,7 @@ def train_network(config: MuZeroConfig, storage: SharedStorage, replay_buffer: R
     network = storage.current_network
     optimizer_info = storage.optimizer_info
     network.loop = loop
+    
     for i in range(epochs):
         batch = replay_buffer.sample_batch(config.num_unroll_steps, config.td_steps)
         if i == 0:
@@ -37,7 +38,7 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
 
     def scale_gradient(tensor, scale: float):
         """Trick function to scale the gradient in pytorch"""
-        return (1. - scale) * torch.Tensor.detach(tensor) + scale * tensor
+        return (1. - scale) * tensor + scale * tensor
     def L2(weights):
         alpha = con['spectral_weight_decay']
         l2 = 0
@@ -189,11 +190,17 @@ def update_weights(optimizer_info: Dict, network: DefaultNetwork, batch):
         logging.info(loss_string)
         print(loss_string)
         return loss
+    print('__before__')
+    for l in network.cb_get_variables():
+        print(l)
     optimizer = optim.Adam(network.cb_get_variables(), lr=optimizer_info['lr'])
     optimizer.zero_grad()
     loss = loss()
     loss.backward()
     optimizer.step()
+    print('__after__')
+    for l in network.cb_get_variables():
+        print(l)
     network.training_steps += 1
 
 

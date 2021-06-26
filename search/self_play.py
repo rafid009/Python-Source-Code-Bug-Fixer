@@ -81,6 +81,7 @@ def run_selfplay(config: MuZeroConfig, storage: SharedStorage, replay_buffer: Re
 def run_eval(config: MuZeroConfig, storage: SharedStorage, eval_episodes: int, render=False, plot=False, weight_path=None):
     """Evaluate MuZero without noise added to the prior of the root and without softmax action selection"""
     network = storage.latest_network()
+    network.eval()
     # vis.add_network(network, weight_path)
     T = Thread(network, config, None, render, eval_episodes, mode='eval')
     returns, game_sort = T.run()
